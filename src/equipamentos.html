@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- Tela de Equipamentos - arquivo simples que lista equipamentos do banco -->
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Equipamentos - Estoque DTI</title>
+  <link rel="stylesheet" href="/equipamento.css">
+  <!-- Não depende de Live Server: arquivo servido pelo backend em / -->
+  <style>
+    /* fallback mínimo, o arquivo externo fornece estilos principais */
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Equipamentos</h1>
+    <a href="/" id="back">Voltar</a>
+  </header>
+
+  <main>
+    <div id="controls">
+      <input id="search" placeholder="Pesquisar por patrimônio, modelo ou marca" />
+      <button id="refresh">Atualizar</button>
+    </div>
+
+    <div id="msg" aria-live="polite" style="margin:8px 0;color:#c00"></div>
+
+    <table id="equip-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Patrimônio</th>
+          <th>Modelo</th>
+          <th>Marca</th>
+          <th>Tipo</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <script src="/equipamento.js"></script>
+</body>
+</html>

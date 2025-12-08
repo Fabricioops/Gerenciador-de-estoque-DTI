@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- Arquivo de fallback estático criado durante o processo de correção.
+     Observação sobre alterações recentes:
+     - O fluxo principal agora utiliza o dashboard embutido em `index.html` (SPA),
+       portanto este arquivo existe apenas como fallback caso o frontend seja
+       servido separadamente. A tela principal do projeto foi integrada ao
+       `index.html` para manter single-origin em desenvolvimento.
+-->
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard - Gerenciador de Estoque</title>
+</head>
+<body>
+  <h1>Dashboard</h1>
+  <p>Bem-vindo ao dashboard.</p>
+  <button id="logout">Sair</button>
+  <script src="/script.js"></script>
+  <script>
+    document.getElementById('logout').addEventListener('click', () => {
+      localStorage.removeItem('user');
+      window.location.href = '/index.html';
+    });
+  </script>
+</body>
+</html>
