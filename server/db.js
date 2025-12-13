@@ -8,7 +8,6 @@ try {
 } catch (e) {
   // dotenv pode não estar instalado — ignorar se faltar
 }
-
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
@@ -17,9 +16,19 @@ const dbConfig = {
   waitForConnections: true,
   connectionLimit: Number(process.env.DB_CONN_LIMIT) || 10,
   queueLimit: 0,
-  connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT) || 10000,
-  acquireTimeout: Number(process.env.DB_ACQUIRE_TIMEOUT) || 10000,
 };
+//const dbConfig = {
+  //host: process.env.DB_HOST || 'localhost',
+  //user: process.env.DB_USER || 'estoque_user',
+  //password: process.env.DB_PASSWORD || 'admin123',
+ // database: process.env.DB_NAME || 'dti_estoque',
+ // waitForConnections: true,
+ // connectionLimit: Number(process.env.DB_CONN_LIMIT) || 10,
+ // queueLimit: 0,
+ // connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT) || 10000,
+ // acquireTimeout: Number(process.env.DB_ACQUIRE_TIMEOUT) || 10000,
+//};
+
 
 let pool = null;
 
