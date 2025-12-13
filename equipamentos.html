@@ -4,43 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equipamentos - Sistema de Estoque DTI</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="equipamentos.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo-section">
-                <h1>Controle de Estoque</h1>
-                <span class="subtitle">Departamento de Tecnologia da Informação - DTI</span>
-            </div>
-            <div class="user-section">
-                <span class="user-name">Bem-vindo, <span id="user-name">Usuário</span></span>
-                <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </button>
-            </div>
+    <!-- Header (reutiliza classes do dashboard principal) -->
+    <header class="main-header">
+        <div class="logo-area">
+            <h1>Controle de Estoque</h1>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link">Dashboard</a>
+            <a href="equipamentos.html" class="nav-link active">Equipamentos</a>
+            <a href="movimentacoes.html" class="nav-link">Movimentações</a>
+            <a href="relatorios.html" class="nav-link">Relatórios</a>
+        </nav>
+        <div class="user-area">
+            <span id="user-name">Bem-vindo, Usuário</span>
+            <a href="#" id="logout-btn" onclick="logout()">Sair</a>
         </div>
     </header>
-
-    <!-- Navigation -->
-    <nav class="navigation">
-        <div class="nav-content">
-            <a href="index.html" class="nav-item">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </a>
-            <a href="equipamentos.html" class="nav-item active">
-                <i class="fas fa-desktop"></i> Equipamentos
-            </a>
-            <a href="movimentacoes.html" class="nav-item">
-                <i class="fas fa-exchange-alt"></i> Movimentações
-            </a>
-            <a href="relatorios.html" class="nav-item">
-                <i class="fas fa-chart-bar"></i> Relatórios
-            </a>
-        </div>
-    </nav>
 
     <!-- Main Content -->
     <main class="main-content">
