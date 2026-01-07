@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!-- Modificações recentes (explicação):
+    - Mantivemos o dashboard embutido neste arquivo (`#dashboard-container`) e agora
+        o frontend usa o mesmo host/porta do backend em desenvolvimento (http://localhost:3000)
+        para evitar problemas de origem ao acessar /dashboard.
+    - Foram adicionados IDs nos cards do dashboard (ex: id="card-total") para que o
+        JavaScript possa preencher os valores dinamicamente a partir da API `/api/dashboard`.
+    - O elemento de saudação recebeu id="user-name" para exibir o nome do usuário logado.
+-->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque DTI</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Incluindo a biblioteca Chart.js para os gráficos do dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-container" class="container">
+        <div class="login-box">
+            <div class="login-header">
+                <h2>Controle de Estoque</h2>
+                <span>Departamento de Tecnologia da Informação - DTI</span>
+            </div>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <p id="error-message" class="error-message" style="display: none;"></p>
+                <button type="submit" class="btn-login">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TELA PRINCIPAL / DASHBOARD (Inicialmente oculta ) -->
+    <div id="dashboard-container" class="container" style="display: none;">
+        <div id="site-header"></div>
+
+        <main class="dashboard-content">
+            <!-- Cards de Resumo -->
+            <section class="summary-cards">
+                <div class="card">
+                    <h3>Total de Itens</h3>
+                    <p id="card-total"></p>
+                </div>
+                <div class="card">
+                    <h3>Itens em Estoque</h3>
+                    <p id="card-in-stock"></p>
+                </div>
+                <div class="card">
+                    <h3>Itens para Descarte</h3>
+                    <p id="card-discard"></p>
+                </div>
+            </section>
+
+            <!-- Gráficos -->
+            <section class="charts-section">
+                <div class="chart-container">
+                    <h3>Equipamentos por Categoria</h3>
+                    <canvas id="category-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Equipamentos por Status</h3>
+                    <canvas id="status-chart"></canvas>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="src/header.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

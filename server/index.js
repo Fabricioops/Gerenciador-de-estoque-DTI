@@ -29,8 +29,8 @@ app.use((req, res, next) => {
 
 // Rotas da API
 app.use('/api/auth', authRoutes); 
-// Servir arquivos estáticos do frontend (pasta src) na raiz
-app.use(express.static(path.join(__dirname, '..', 'src')));
+// Servir arquivos estáticos do frontend (pasta public) na raiz
+app.use(express.static(path.join(__dirname, '..', 'public')));
 // Rotas de dashboard (API)
 app.use('/api/dashboard', dashboardRoutes);
 // Rotas de equipamentos (API) - lista e operações relacionadas
@@ -39,9 +39,9 @@ app.use('/api/equipamentos', equipamentoRoutes);
 
 // Rota de teste
 app.get('/', (req, res) => {
-    // Serve the frontend index.html from the src folder so the app can be
+    // Serve the frontend index.html from the public folder so the app can be
     // accessed at http://localhost:3000/ (same origin as the API).
-    res.sendFile(path.join(__dirname, '..', 'src', 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 // Inicia o servidor após conectar ao banco de dados
