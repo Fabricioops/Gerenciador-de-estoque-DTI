@@ -1,8 +1,8 @@
 // server/index.js
 // Modificações recentes (explicação):
-// - Agora o servidor serve os arquivos estáticos do frontend (pasta `src`) via Express.
-// - A rota raiz `/` foi alterada para enviar o arquivo `src/index.html`, garantindo
-//   que frontend e backend rodem na mesma origem (http://localhost:3000) em dev.
+// - Agora o servidor serve os arquivos estáticos do frontend (pasta `public`) via Express.
+// - A rota raiz `/` envia o arquivo `public/index.html`, garantindo que frontend
+//   e backend rodem na mesma origem (http://localhost:3000) em dev.
 // - As rotas da API de dashboard foram registradas em `/api/dashboard`.
 // Essas alterações resolvem o erro de 404 ao redirecionar para `/dashboard.html` e
 // permitem o fluxo single-origin (evitando problemas de localStorage entre portas).
@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 
 // Rotas da API
 app.use('/api/auth', authRoutes); 
-// Servir arquivos estáticos do frontend (pasta public) na raiz
+// Servir arquivos estáticos do frontend (pasta `public`) na raiz
 app.use(express.static(path.join(__dirname, '..', 'public')));
 // Rotas de dashboard (API)
 app.use('/api/dashboard', dashboardRoutes);
