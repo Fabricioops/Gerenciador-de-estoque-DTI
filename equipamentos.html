@@ -4,43 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equipamentos - Sistema de Estoque DTI</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="equipamentos.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo-section">
-                <h1>Controle de Estoque</h1>
-                <span class="subtitle">Departamento de Tecnologia da Informação - DTI</span>
-            </div>
-            <div class="user-section">
-                <span class="user-name">Bem-vindo, <span id="user-name">Usuário</span></span>
-                <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Navigation -->
-    <nav class="navigation">
-        <div class="nav-content">
-            <a href="index.html" class="nav-item">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </a>
-            <a href="equipamentos.html" class="nav-item active">
-                <i class="fas fa-desktop"></i> Equipamentos
-            </a>
-            <a href="movimentacoes.html" class="nav-item">
-                <i class="fas fa-exchange-alt"></i> Movimentações
-            </a>
-            <a href="relatorios.html" class="nav-item">
-                <i class="fas fa-chart-bar"></i> Relatórios
-            </a>
-        </div>
-    </nav>
+    <div id="site-header"></div>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -214,6 +183,8 @@
     <!-- Toast Notifications -->
     <div class="toast-container" id="toast-container"></div>
 
+    <script src="src/header.js"></script>
+    <script src="script.js"></script>
     <script src="equipamentos.js"></script>
 </body>
 </html>

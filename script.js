@@ -5,7 +5,8 @@
 // - Ao exibir o dashboard, o script busca dados na API (`/api/dashboard/...`) e
 //   inicializa os gráficos Chart.js com os dados retornados.
 // - Adicionados handlers de logout e checagem inicial para manter sessão via localStorage.
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadSharedHeader();
   const loginForm = document.getElementById("login-form");
   const errorMessage = document.getElementById("error-message");
 
@@ -98,6 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Se quisermos atualizar logout handler novamente (caso header seja recarregado)
+  // podemos rebindar aqui ou chamar loadSharedHeader() novamente.
+
   // Quando o dashboard é exibido, popula os cards e inicializa gráficos
   async function loadDashboardData() {
     try {
@@ -161,3 +165,18 @@ document.addEventListener("DOMContentLoaded", () => {
     loadDashboardData();
   }
 });
+
+// Função que carrega o header compartilhado (`header.html`) e injetá-lo
+async function loadSharedHeader() {
+  try {
+    const placeholder = document.getElementById('site-header');
+    if (!placeholder) return;
+    if (placeholder.innerHTML && placeholder.innerHTML.trim().length > 0) return; // header already injected
+    const resp = await fetch('/header.html');
+    if (!resp.ok) return;
+    const html = await resp.text();
+    placeholder.innerHTML = html;
+  } catch (e) {
+    console.warn('Não foi possível carregar header compartilhado:', e);
+  }
+}

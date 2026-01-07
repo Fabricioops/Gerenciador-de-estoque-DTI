@@ -7,18 +7,32 @@ let currentEditingId = null;
 const API_BASE_URL = 'http://localhost:3000/api';
 
 // Inicialização da página
+// Inicialização da página — aguarda injeção do header se disponível
 document.addEventListener('DOMContentLoaded', function() {
-    loadUserInfo();
-    loadEquipments();
-    setupEventListeners();
-    setDefaultDate();
+    const init = () => {
+        loadUserInfo();
+        loadEquipments();
+        setupEventListeners();
+        setDefaultDate();
+    };
+
+    if (window.headerReady && typeof window.headerReady.then === 'function') {
+        window.headerReady.then(init).catch(init);
+    } else {
+        init();
+    }
 });
 
 // Carrega informações do usuário logado
 function loadUserInfo() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user.nome) {
-        document.getElementById('user-name').textContent = user.nome;
+    try {
+        const el = document.getElementById('user-name');
+        if (user.nome && el) {
+            el.textContent = user.nome;
+        }
+    } catch (e) {
+        // elemento ainda não disponível — silenciosamente ignorar
     }
 }
 

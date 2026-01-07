@@ -11,17 +11,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Dashboard - Gerenciador de Estoque</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <h1>Dashboard</h1>
-  <p>Bem-vindo ao dashboard.</p>
-  <button id="logout">Sair</button>
+  <div id="site-header"></div>
+  <main>
+    <h1>Dashboard</h1>
+    <p>Bem-vindo ao dashboard.</p>
+  </main>
   <script src="/script.js"></script>
-  <script>
-    document.getElementById('logout').addEventListener('click', () => {
-      localStorage.removeItem('user');
-      window.location.href = '/index.html';
-    });
-  </script>
 </body>
 </html>
