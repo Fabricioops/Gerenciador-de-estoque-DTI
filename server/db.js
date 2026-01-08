@@ -16,10 +16,7 @@ const dbConfig = {
   waitForConnections: true,
   connectionLimit: Number(process.env.DB_CONN_LIMIT) || 10,
   queueLimit: 0,
-<<<<<<< HEAD
   connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT) || 10000,
-=======
->>>>>>> b50bed1f3ed061424e72c8dd7790327244a08c05
 };
 //const dbConfig = {
   //host: process.env.DB_HOST || 'localhost',

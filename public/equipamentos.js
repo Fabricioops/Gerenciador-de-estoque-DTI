@@ -215,6 +215,6 @@ function editEquipment(id) {
     if (!equipment) return;
     
     currentEditingId = id;
-    document.getElementById('modal-title').innerHTML = '<i class="fas fa-edit"></i> Editar Equipamento';
+    document.getElementById('modal-title').innerHTML = '<i class="fas fa-edit"></i> Editar Equipamento';};
     
     // Preenche o formulário
