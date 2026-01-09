@@ -49,7 +49,7 @@ async function startServer() {
     try {
         await connectDB();
         app.listen(PORT, () => {
-            console.log(`Servidor backend rodando na porta ${PORT}`);
+            console.log(`http://localhost:${PORT}`);
         });
     } catch (error) {
         console.error("Não foi possível iniciar o servidor.", error);

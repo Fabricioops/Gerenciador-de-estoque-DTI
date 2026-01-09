@@ -1,21 +1,27 @@
+// ===============================
 // Variáveis globais
+// ===============================
 let equipments = [];
 let filteredEquipments = [];
 let currentEditingId = null;
 
+// ===============================
 // Configuração da API
+// ===============================
 const API_BASE_URL = 'http://localhost:3000/api';
 
+// ===============================
 // Inicialização da página
-// Inicialização da página — aguarda injeção do header se disponível
-document.addEventListener('DOMContentLoaded', function() {
+// ===============================
+document.addEventListener('DOMContentLoaded', () => {
     const init = () => {
         loadUserInfo();
-        loadEquipments();
         setupEventListeners();
+        loadEquipments();
         setDefaultDate();
     };
 
+    // Caso exista controle de carregamento do header
     if (window.headerReady && typeof window.headerReady.then === 'function') {
         window.headerReady.then(init).catch(init);
     } else {
@@ -23,42 +29,54 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Carrega informações do usuário logado
+// ===============================
+// Usuário logado
+// ===============================
 function loadUserInfo() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
     try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
         const el = document.getElementById('user-name');
-        if (user.nome && el) {
+        if (el && user.nome) {
             el.textContent = user.nome;
         }
-    } catch (e) {
-        // elemento ainda não disponível — silenciosamente ignorar
+    } catch {
+        // ignora erro
     }
 }
 
-// Configura os event listeners
+// ===============================
+// Event listeners
+// ===============================
 function setupEventListeners() {
-    // Busca em tempo real
-    document.getElementById('search-input').addEventListener('input', debounce(filterEquipments, 300));
-    
-    // Filtros
-    document.getElementById('status-filter').addEventListener('change', filterEquipments);
-    document.getElementById('local-filter').addEventListener('change', filterEquipments);
-    
-    // Formulário de equipamento
-    document.getElementById('equipment-form').addEventListener('submit', handleFormSubmit);
-    
-    // Fechar modais ao clicar fora
-    document.getElementById('equipment-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
-    
-    document.getElementById('details-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeDetailsModal();
-    });
-    
-    // Tecla ESC para fechar modais
-    document.addEventListener('keydown', function(e) {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(filterEquipments, 300));
+    }
+
+    const statusFilter = document.getElementById('status-filter');
+    if (statusFilter) statusFilter.addEventListener('change', filterEquipments);
+
+    const localFilter = document.getElementById('local-filter');
+    if (localFilter) localFilter.addEventListener('change', filterEquipments);
+
+    const form = document.getElementById('equipment-form');
+    if (form) form.addEventListener('submit', handleFormSubmit);
+
+    const equipmentModal = document.getElementById('equipment-modal');
+    if (equipmentModal) {
+        equipmentModal.addEventListener('click', e => {
+            if (e.target === equipmentModal) closeModal();
+        });
+    }
+
+    const detailsModal = document.getElementById('details-modal');
+    if (detailsModal) {
+        detailsModal.addEventListener('click', e => {
+            if (e.target === detailsModal) closeDetailsModal();
+        });
+    }
+
+    document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             closeModal();
             closeDetailsModal();
@@ -66,46 +84,42 @@ function setupEventListeners() {
     });
 }
 
-// Define data padrão como hoje
-function setDefaultDate() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('data_cadastro').value = today;
-}
-
-// Função debounce para otimizar a busca
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+// ===============================
+// Utilidades
+// ===============================
+function debounce(fn, delay) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
     };
 }
 
-// Carrega equipamentos da API
+function setDefaultDate() {
+    const input = document.getElementById('data_cadastro');
+    if (!input) return;
+    input.value = new Date().toISOString().split('T')[0];
+}
+
+// ===============================
+// API / Dados
+// ===============================
 async function loadEquipments() {
     showLoading(true);
-    
     try {
-        const response = await fetch(`${API_BASE_URL}/equipamentos`, {
+        const res = await fetch(`${API_BASE_URL}/equipamentos`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                Authorization: `Bearer ${localStorage.getItem('token')}`
             }
         });
-        
-        if (!response.ok) {
-            throw new Error('Erro ao carregar equipamentos');
-        }
-        
-        equipments = await response.json();
+
+        if (!res.ok) throw new Error('Erro ao buscar equipamentos');
+
+        equipments = await res.json();
         filteredEquipments = [...equipments];
         renderEquipments();
-        
-    } catch (error) {
-        console.error('Erro ao carregar equipamentos:', error);
+    } catch (err) {
+        console.error(err);
         showToast('Erro ao carregar equipamentos', 'error');
         showEmptyState(true);
     } finally {
@@ -113,85 +127,84 @@ async function loadEquipments() {
     }
 }
 
-// Renderiza os equipamentos na tela
+// ===============================
+// Renderização
+// ===============================
 function renderEquipments() {
     const grid = document.getElementById('equipment-grid');
-    
-    if (filteredEquipments.length === 0) {
+    if (!grid) return;
+
+    if (!filteredEquipments.length) {
         showEmptyState(true);
         return;
     }
-    
+
     showEmptyState(false);
-    
-    grid.innerHTML = filteredEquipments.map(equipment => `
-        <div class="equipment-card" onclick="showDetails(${equipment.id})">
-            <div class="card-header">
-                <div>
-                    <div class="equipment-type">${equipment.tipo_equipamento}</div>
-                    <div class="equipment-brand">${equipment.marca} ${equipment.modelo}</div>
-                </div>
-                <div class="card-actions">
-                    <button class="action-btn edit" onclick="event.stopPropagation(); editEquipment(${equipment.id})" title="Editar">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="action-btn delete" onclick="event.stopPropagation(); deleteEquipment(${equipment.id})" title="Excluir">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="card-info">
-                <div class="info-item">
-                    <div class="info-label">Patrimônio</div>
-                    <div class="info-value">${equipment.patrimonio || 'S/P'}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Número de Série</div>
-                    <div class="info-value">${equipment.numero_serie || 'N/A'}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value">
-                        <span class="status-badge status-${equipment.status_equipamento.toLowerCase()}">
-                            <i class="fas fa-circle"></i>
-                            ${getStatusLabel(equipment.status_equipamento)}
-                        </span>
+
+    grid.innerHTML = filteredEquipments.map(eq => {
+        const statusClass = (eq.status_equipamento || '').toLowerCase();
+        const marcaModelo = `${eq.marca || ''} ${eq.modelo || ''}`.trim();
+
+        return `
+            <div class="equipment-card" onclick="showDetails(${eq.id})">
+                <div class="card-header">
+                    <div>
+                        <div class="equipment-type">${eq.tipo_equipamento || ''}</div>
+                        <div class="equipment-brand">${marcaModelo}</div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-btn edit"
+                            onclick="event.stopPropagation(); editEquipment(${eq.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete"
+                            onclick="event.stopPropagation(); deleteEquipment(${eq.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Local</div>
-                    <div class="info-value">${getLocalName(equipment.local_id)}</div>
+
+                <div class="card-info">
+                    <div><strong>Patrimônio:</strong> ${eq.patrimonio || 'S/P'}</div>
+                    <div><strong>Nº Série:</strong> ${eq.numero_serie || 'N/A'}</div>
+                    <div>
+                        <span class="status-badge status-${statusClass}">
+                            ${getStatusLabel(eq.status_equipamento)}
+                        </span>
+                    </div>
+                    <div><strong>Local:</strong> ${getLocalName(eq.local_id)}</div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
-// Filtra equipamentos baseado nos critérios
+// ===============================
+// Filtros
+// ===============================
 function filterEquipments() {
-    const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const statusFilter = document.getElementById('status-filter').value;
-    const localFilter = document.getElementById('local-filter').value;
-    
-    filteredEquipments = equipments.filter(equipment => {
-        const matchesSearch = !searchTerm || 
-            equipment.tipo_equipamento.toLowerCase().includes(searchTerm) ||
-            equipment.marca.toLowerCase().includes(searchTerm) ||
-            equipment.modelo.toLowerCase().includes(searchTerm) ||
-            (equipment.patrimonio && equipment.patrimonio.toLowerCase().includes(searchTerm)) ||
-            (equipment.numero_serie && equipment.numero_serie.toLowerCase().includes(searchTerm));
-        
-        const matchesStatus = !statusFilter || equipment.status_equipamento === statusFilter;
-        const matchesLocal = !localFilter || equipment.local_id.toString() === localFilter;
-        
+    const search = (document.getElementById('search-input')?.value || '').toLowerCase();
+    const status = document.getElementById('status-filter')?.value || '';
+    const local = document.getElementById('local-filter')?.value || '';
+
+    filteredEquipments = equipments.filter(eq => {
+        const matchesSearch =
+            !search ||
+            (eq.tipo_equipamento || '').toLowerCase().includes(search) ||
+            (eq.marca || '').toLowerCase().includes(search) ||
+            (eq.modelo || '').toLowerCase().includes(search) ||
+            (eq.patrimonio && String(eq.patrimonio).toLowerCase().includes(search)) ||
+            (eq.numero_serie && String(eq.numero_serie).toLowerCase().includes(search));
+
+        const matchesStatus = !status || eq.status_equipamento === status;
+        const matchesLocal = !local || String(eq.local_id) === local;
+
         return matchesSearch && matchesStatus && matchesLocal;
     });
-    
+
     renderEquipments();
 }
 
-// Limpa todos os filtros
 function clearFilters() {
     document.getElementById('search-input').value = '';
     document.getElementById('status-filter').value = '';
@@ -200,21 +213,139 @@ function clearFilters() {
     renderEquipments();
 }
 
-// Abre modal para adicionar equipamento
+// ===============================
+// Modais
+// ===============================
 function openAddModal() {
     currentEditingId = null;
-    document.getElementById('modal-title').innerHTML = '<i class="fas fa-plus"></i> Novo Equipamento';
     document.getElementById('equipment-form').reset();
     setDefaultDate();
     document.getElementById('equipment-modal').classList.add('active');
 }
 
-// Abre modal para editar equipamento
 function editEquipment(id) {
-    const equipment = equipments.find(eq => eq.id === id);
-    if (!equipment) return;
-    
+    const eq = equipments.find(e => e.id === id);
+    if (!eq) return;
+
     currentEditingId = id;
-    document.getElementById('modal-title').innerHTML = '<i class="fas fa-edit"></i> Editar Equipamento';};
-    
-    // Preenche o formulário
+
+    document.getElementById('equipment-id').value = eq.id;
+    document.getElementById('tipo_equipamento').value = eq.tipo_equipamento || '';
+    document.getElementById('marca').value = eq.marca || '';
+    document.getElementById('modelo').value = eq.modelo || '';
+    document.getElementById('patrimonio').value = eq.patrimonio || '';
+    document.getElementById('numero_serie').value = eq.numero_serie || '';
+    document.getElementById('status_equipamento').value = eq.status_equipamento || '';
+    document.getElementById('local_id').value = eq.local_id || '';
+    document.getElementById('observacao').value = eq.observacao || '';
+
+    document.getElementById('equipment-modal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('equipment-modal')?.classList.remove('active');
+}
+
+function closeDetailsModal() {
+    document.getElementById('details-modal')?.classList.remove('active');
+}
+
+// ===============================
+// Detalhes
+// ===============================
+function showDetails(id) {
+    const eq = equipments.find(e => e.id === id);
+    if (!eq) return;
+
+    const el = document.getElementById('equipment-details');
+    el.innerHTML = `
+        <div><strong>Tipo:</strong> ${eq.tipo_equipamento}</div>
+        <div><strong>Marca:</strong> ${eq.marca}</div>
+        <div><strong>Modelo:</strong> ${eq.modelo}</div>
+        <div><strong>Status:</strong> ${getStatusLabel(eq.status_equipamento)}</div>
+        <div><strong>Local:</strong> ${getLocalName(eq.local_id)}</div>
+        <div><strong>Obs:</strong> ${eq.observacao || ''}</div>
+    `;
+
+    document.getElementById('details-modal').classList.add('active');
+}
+
+// ===============================
+// CRUD
+// ===============================
+async function handleFormSubmit(e) {
+    e.preventDefault();
+
+    const payload = {
+        tipo_equipamento: tipo_equipamento.value,
+        marca: marca.value,
+        modelo: modelo.value,
+        patrimonio: patrimonio.value,
+        numero_serie: numero_serie.value,
+        status_equipamento: status_equipamento.value,
+        local_id: Number(local_id.value),
+        data_cadastro: data_cadastro.value,
+        observacao: observacao.value
+    };
+
+    showToast('Salvo com sucesso');
+    closeModal();
+    loadEquipments();
+}
+
+async function deleteEquipment(id) {
+    if (!confirm('Confirma exclusão?')) return;
+
+    try {
+        await fetch(`${API_BASE_URL}/equipamentos/${id}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        showToast('Equipamento excluído');
+        loadEquipments();
+    } catch {
+        showToast('Erro ao excluir', 'error');
+    }
+}
+
+// ===============================
+// UI helpers
+// ===============================
+function showLoading(show) {
+    const el = document.getElementById('loading');
+    if (el) el.style.display = show ? 'block' : 'none';
+}
+
+function showEmptyState(show) {
+    document.getElementById('empty-state').style.display = show ? 'block' : 'none';
+    document.getElementById('equipment-grid').style.display = show ? 'none' : 'grid';
+}
+
+function showToast(msg, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
+function getStatusLabel(status) {
+    return {
+        FUNCIONANDO: 'Funcionando',
+        PARA_DESCARTE: 'Para Descarte',
+        INVENTARIADO: 'Inventariado',
+        QUEIMADO: 'Queimado'
+    }[status] || 'Desconhecido';
+}
+
+function getLocalName(id) {
+    return {
+        1: 'Descarte Farolândia',
+        2: 'Lixo Eletrônico B54',
+        3: 'D13',
+        4: 'Inventariado Centro'
+    }[id] || 'Desconhecido';
+}
