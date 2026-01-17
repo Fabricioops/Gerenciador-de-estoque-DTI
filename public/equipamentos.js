@@ -257,6 +257,8 @@ function showDetails(id) {
     const eq = equipments.find(e => e.id === id);
     if (!eq) return;
 
+    window.lastSelectedEquipmentId = id; // 🔴 ESSENCIAL
+
     const el = document.getElementById('equipment-details');
     el.innerHTML = `
         <div><strong>Tipo:</strong> ${eq.tipo_equipamento}</div>
@@ -269,6 +271,7 @@ function showDetails(id) {
 
     document.getElementById('details-modal').classList.add('active');
 }
+
 
 // ===============================
 // CRUD
@@ -288,10 +291,33 @@ async function handleFormSubmit(e) {
         observacao: observacao.value
     };
 
-    showToast('Salvo com sucesso');
-    closeModal();
-    loadEquipments();
+    try {
+        const method = currentEditingId ? 'PUT' : 'POST';
+        const url = currentEditingId
+            ? `${API_BASE_URL}/equipamentos/${currentEditingId}`
+            : `${API_BASE_URL}/equipamentos`;
+
+        const res = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Erro ao salvar');
+
+        showToast('Salvo com sucesso');
+        closeModal();
+        currentEditingId = null;
+        loadEquipments();
+    } catch (err) {
+        console.error(err);
+        showToast('Erro ao salvar equipamento', 'error');
+    }
 }
+
 
 async function deleteEquipment(id) {
     if (!confirm('Confirma exclusão?')) return;
@@ -309,6 +335,14 @@ async function deleteEquipment(id) {
         showToast('Erro ao excluir', 'error');
     }
 }
+
+function editFromDetails() {
+    if (!window.lastSelectedEquipmentId) return;
+
+    closeDetailsModal();
+    editEquipment(window.lastSelectedEquipmentId);
+}
+
 
 // ===============================
 // UI helpers
