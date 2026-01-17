@@ -28,10 +28,21 @@ exports.create = async (req, res) => {
     const insertId = result && result.insertId ? result.insertId : null;
     res.status(201).json({ id: insertId, message: 'Equipamento criado' });
   } catch (err) {
-    // Retornamos a mensagem de erro no JSON apenas para depuração em dev.
-    console.error('Erro create equipamento:', err);
-    res.status(500).json({ message: 'Erro ao criar equipamento', error: err && err.message ? err.message : String(err) });
+  console.error(err);
+
+  // 👉 tratamento de patrimônio duplicado
+  if (err.code === 'ER_DUP_ENTRY') {
+    return res.status(409).json({
+      message: 'Já existe um equipamento com esse patrimônio'
+    });
   }
+
+  // 👉 erro genérico
+  res.status(500).json({
+    message: 'Erro interno ao salvar equipamento'
+  });
+}
+
 };
 
 // Atualiza um equipamento existente
