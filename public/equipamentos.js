@@ -221,7 +221,10 @@ function openAddModal() {
     document.getElementById('equipment-form').reset();
     setDefaultDate();
     document.getElementById('equipment-modal').classList.add('active');
-}
+    document.getElementById('modal-title').innerHTML =
+  '<i class="fas fa-plus"></i> Novo Equipamento';
+
+};
 
 function editEquipment(id) {
     const eq = equipments.find(e => e.id === id);
@@ -240,6 +243,9 @@ function editEquipment(id) {
     document.getElementById('observacao').value = eq.observacao || '';
 
     document.getElementById('equipment-modal').classList.add('active');
+    document.getElementById('modal-title').innerHTML =
+  '<i class="fas fa-edit"></i> Editar Equipamento';
+
 }
 
 function closeModal() {
