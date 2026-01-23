@@ -115,9 +115,11 @@ async function loadEquipments() {
 
         if (!res.ok) throw new Error('Erro ao buscar equipamentos');
 
-        equipments = await res.json();
-        filteredEquipments = [...equipments];
-        renderEquipments();
+       equipments = await res.json();
+filteredEquipments = [...equipments];
+renderEquipments();
+
+
     } catch (err) {
         console.error(err);
         showToast('Erro ao carregar equipamentos', 'error');
@@ -197,7 +199,10 @@ function filterEquipments() {
             (eq.numero_serie && String(eq.numero_serie).toLowerCase().includes(search));
 
         const matchesStatus = !status || eq.status_equipamento === status;
-        const matchesLocal = !local || String(eq.local_id) === local;
+        const matchesLocal =
+  !local ||
+  eq.local_id === null ||
+  String(eq.local_id) === local;
 
         return matchesSearch && matchesStatus && matchesLocal;
     });
@@ -227,8 +232,10 @@ function openAddModal() {
 };
 
 function editEquipment(id) {
-    const eq = equipments.find(e => e.id === id);
-    if (!eq) return;
+   const eq =
+  equipments.find(e => e.id === id) ||
+  filteredEquipments.find(e => e.id === id);
+    
 
     currentEditingId = id;
 
@@ -283,49 +290,63 @@ function showDetails(id) {
 // CRUD
 // ===============================
 async function handleFormSubmit(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    const payload = {
-        tipo_equipamento: tipo_equipamento.value,
-        marca: marca.value,
-        modelo: modelo.value,
-        patrimonio: patrimonio.value,
-        numero_serie: numero_serie.value,
-        status_equipamento: status_equipamento.value,
-        local_id: Number(local_id.value),
-        data_cadastro: data_cadastro.value,
-        observacao: observacao.value
-    };
+  const payload = {
+    tipo_equipamento: tipo_equipamento.value,
+    marca: marca.value,
+    modelo: modelo.value,
+    patrimonio: patrimonio.value,
+    numero_serie: numero_serie.value,
+    status_equipamento: status_equipamento.value,
+    local_id: local_id.value ? Number(local_id.value) : null,
+    data_cadastro: data_cadastro.value,
+    observacao: observacao.value
+  };
 
-    try {
-        const method = currentEditingId ? 'PUT' : 'POST';
-        const url = currentEditingId
-            ? `${API_BASE_URL}/equipamentos/${currentEditingId}`
-            : `${API_BASE_URL}/equipamentos`;
+  try {
+    const method = currentEditingId ? 'PUT' : 'POST';
+    const url = currentEditingId
+      ? `${API_BASE_URL}/equipamentos/${currentEditingId}`
+      : `${API_BASE_URL}/equipamentos`;
 
-        const res = await fetch(url, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(payload)
-        });
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(payload)
+    });
 
-       if (!res.ok) {
-  const errorData = await res.json();
-  throw new Error(errorData.message || 'Erro ao salvar');
-}
-
-
-        showToast('Salvo com sucesso');
-        closeModal();
-        currentEditingId = null;
-        loadEquipments();
-    } catch (err) {
-        console.error(err);
-        showToast('Erro ao salvar equipamento', 'error');
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Erro ao salvar equipamento');
     }
+
+    // ✅ LIMPA FILTROS (ESSENCIAL)
+    document.getElementById('search-input').value = '';
+    document.getElementById('status-filter').value = '';
+    document.getElementById('local-filter').value = '';
+
+    // ✅ RECARREGA LISTA DO BACKEND
+    await loadEquipments();
+
+    // ✅ FECHA MODAL / FORM
+    closeModal();
+    resetForm();
+
+    showToast(
+      currentEditingId ? 'Equipamento atualizado com sucesso' : 'Equipamento criado com sucesso',
+      'success'
+    );
+
+    currentEditingId = null;
+
+  } catch (err) {
+    console.error(err);
+    showToast(err.message || 'Erro ao salvar equipamento', 'error');
+  }
 }
 
 
