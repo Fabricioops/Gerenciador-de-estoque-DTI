@@ -11,8 +11,8 @@ try {
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'faps1234$@',
-  database: process.env.DB_NAME || 'dti-estoque',
+  password: process.env.DB_PASSWORD || 'admin123',
+  database: process.env.DB_NAME || 'dti_estoque',
   waitForConnections: true,
   connectionLimit: Number(process.env.DB_CONN_LIMIT) || 10,
   queueLimit: 0,
@@ -21,7 +21,7 @@ const dbConfig = {
 //const dbConfig = {
   //host: process.env.DB_HOST || 'localhost',
   //user: process.env.DB_USER || 'estoque_user',
-  //password: process.env.DB_PASSWORD || 'admin123',
+  //password: process.env.DB_PASSWORD || 'admin123' faps1234$@,
  // database: process.env.DB_NAME || 'dti_estoque',
  // waitForConnections: true,
  // connectionLimit: Number(process.env.DB_CONN_LIMIT) || 10,
