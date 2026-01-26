@@ -198,11 +198,8 @@ function filterEquipments() {
             (eq.patrimonio && String(eq.patrimonio).toLowerCase().includes(search)) ||
             (eq.numero_serie && String(eq.numero_serie).toLowerCase().includes(search));
 
-        const matchesStatus = !status || eq.status_equipamento === status;
-        const matchesLocal =
-  !local ||
-  eq.local_id === null ||
-  String(eq.local_id) === local;
+          const matchesStatus = !status || eq.status_equipamento === status;
+          const matchesLocal = !local || (eq.local_id != null && String(eq.local_id) === local);
 
         return matchesSearch && matchesStatus && matchesLocal;
     });
