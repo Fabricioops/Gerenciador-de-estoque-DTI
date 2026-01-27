@@ -242,8 +242,10 @@ function editEquipment(id) {
     document.getElementById('modelo').value = eq.modelo || '';
     document.getElementById('patrimonio').value = eq.patrimonio || '';
     document.getElementById('numero_serie').value = eq.numero_serie || '';
+    document.getElementById('numero_chamado').value = eq.numero_chamado || '';
     document.getElementById('status_equipamento').value = eq.status_equipamento || '';
     document.getElementById('local_id').value = eq.local_id || '';
+    document.getElementById('tecnico').value = eq.tecnico || '';
     document.getElementById('observacao').value = eq.observacao || '';
 
     document.getElementById('equipment-modal').classList.add('active');
@@ -261,6 +263,22 @@ function closeDetailsModal() {
 }
 
 // ===============================
+// Form helpers
+// ===============================
+function resetForm() {
+    const form = document.getElementById('equipment-form');
+    if (form) form.reset();
+
+    const idEl = document.getElementById('equipment-id');
+    if (idEl) idEl.value = '';
+
+    currentEditingId = null;
+
+    // garante que a data de cadastro volte ao padrão
+    try { setDefaultDate(); } catch (e) { /* ignore */ }
+}
+
+// ===============================
 // Detalhes
 // ===============================
 function showDetails(id) {
@@ -270,13 +288,41 @@ function showDetails(id) {
     window.lastSelectedEquipmentId = id; // 🔴 ESSENCIAL
 
     const el = document.getElementById('equipment-details');
+    const safe = v => (v === null || v === undefined || v === '') ? '<span class="details-value null">n/a</span>' : `<span class="details-value">${v}</span>`;
+
     el.innerHTML = `
-        <div><strong>Tipo:</strong> ${eq.tipo_equipamento}</div>
-        <div><strong>Marca:</strong> ${eq.marca}</div>
-        <div><strong>Modelo:</strong> ${eq.modelo}</div>
-        <div><strong>Status:</strong> ${getStatusLabel(eq.status_equipamento)}</div>
-        <div><strong>Local:</strong> ${getLocalName(eq.local_id)}</div>
-        <div><strong>Obs:</strong> ${eq.observacao || ''}</div>
+        <div class="details-row">
+            <div class="details-label">Tipo:</div>
+            ${safe(eq.tipo_equipamento)}
+        </div>
+        <div class="details-row">
+            <div class="details-label">Marca:</div>
+            ${safe(eq.marca)}
+        </div>
+        <div class="details-row">
+            <div class="details-label">Modelo:</div>
+            ${safe(eq.modelo)}
+        </div>
+        <div class="details-row">
+            <div class="details-label">Status:</div>
+            <span class="details-value">${getStatusLabel(eq.status_equipamento)}</span>
+        </div>
+        <div class="details-row">
+            <div class="details-label">Local:</div>
+            <span class="details-value">${getLocalName(eq.local_id)}</span>
+        </div>
+        <div class="details-row">
+            <div class="details-label">Número do Chamado:</div>
+            ${safe(eq.numero_chamado)}
+        </div>
+        <div class="details-row">
+            <div class="details-label">Técnico:</div>
+            ${safe(eq.tecnico)}
+        </div>
+        <div class="details-row">
+            <div class="details-label">Obs:</div>
+            ${safe(eq.observacao)}
+        </div>
     `;
 
     document.getElementById('details-modal').classList.add('active');
@@ -295,10 +341,12 @@ async function handleFormSubmit(e) {
     modelo: modelo.value,
     patrimonio: patrimonio.value,
     numero_serie: numero_serie.value,
+        numero_chamado: numero_chamado?.value || '',
     status_equipamento: status_equipamento.value,
     local_id: local_id.value ? Number(local_id.value) : null,
     data_cadastro: data_cadastro.value,
-    observacao: observacao.value
+        observacao: observacao.value,
+        tecnico: tecnico?.value || ''
   };
 
   try {

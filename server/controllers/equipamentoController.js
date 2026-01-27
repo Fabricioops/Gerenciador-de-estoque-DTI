@@ -16,13 +16,25 @@ exports.list = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const {
-      tipo_equipamento, marca, modelo, patrimonio, numero_serie,
-      status_equipamento, local_id, data_cadastro, observacao
+      tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado,
+      status_equipamento, local_id, data_cadastro, observacao, tecnico
     } = req.body;
 
-    const sql = `INSERT INTO Equipamentos (tipo_equipamento, marca, modelo, patrimonio, numero_serie, status_equipamento, local_id, data_cadastro, observacao)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const result = await executeQuery(sql, [tipo_equipamento, marca, modelo, patrimonio, numero_serie, status_equipamento, local_id || null, data_cadastro || null, observacao || null]);
+    const sql = `INSERT INTO Equipamentos (tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado, status_equipamento, local_id, data_cadastro, observacao, tecnico)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const result = await executeQuery(sql, [
+      tipo_equipamento,
+      marca,
+      modelo,
+      patrimonio,
+      numero_serie,
+      numero_chamado || null,
+      status_equipamento,
+      local_id || null,
+      data_cadastro || null,
+      observacao || null,
+      tecnico || null
+    ]);
 
     // result pode ser um objeto OkPacket com insertId
     const insertId = result && result.insertId ? result.insertId : null;
@@ -50,12 +62,25 @@ exports.update = async (req, res) => {
   try {
     const id = req.params.id;
     const {
-      tipo_equipamento, marca, modelo, patrimonio, numero_serie,
-      status_equipamento, local_id, data_cadastro, observacao
+      tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado,
+      status_equipamento, local_id, data_cadastro, observacao, tecnico
     } = req.body;
 
-    const sql = `UPDATE Equipamentos SET tipo_equipamento = ?, marca = ?, modelo = ?, patrimonio = ?, numero_serie = ?, status_equipamento = ?, local_id = ?, data_cadastro = ?, observacao = ? WHERE id = ?`;
-    const result = await executeQuery(sql, [tipo_equipamento, marca, modelo, patrimonio, numero_serie, status_equipamento, local_id || null, data_cadastro || null, observacao || null, id]);
+    const sql = `UPDATE Equipamentos SET tipo_equipamento = ?, marca = ?, modelo = ?, patrimonio = ?, numero_serie = ?, numero_chamado = ?, status_equipamento = ?, local_id = ?, data_cadastro = ?, observacao = ?, tecnico = ? WHERE id = ?`;
+    const result = await executeQuery(sql, [
+      tipo_equipamento,
+      marca,
+      modelo,
+      patrimonio,
+      numero_serie,
+      numero_chamado || null,
+      status_equipamento,
+      local_id || null,
+      data_cadastro || null,
+      observacao || null,
+      tecnico || null,
+      id
+    ]);
 
     res.json({ affectedRows: result && result.affectedRows ? result.affectedRows : 0, message: 'Equipamento atualizado' });
   } catch (err) {

@@ -257,6 +257,32 @@ body {
 .modal-body { max-height:60vh; overflow:auto; padding-right:6px; }
 .modal-footer { display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.5rem; }
 
+/* Detalhes do equipamento (modal) */
+.details-grid {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 0.5rem 1.25rem;
+    align-items: start;
+    padding: 0.5rem 0;
+    font-size: 0.98rem;
+}
+.details-grid .details-label {
+    font-weight: 700;
+    color: #fff;
+}
+.details-grid .details-value {
+    color: #d7d7d7;
+    word-break: break-word;
+}
+.details-grid .details-value.null {
+    opacity: 0.65;
+    font-style: italic;
+}
+
+@media (max-width:800px) {
+    .details-grid { grid-template-columns: 1fr; }
+}
+
 /* Loading / empty / toast */
 .loading { text-align:center; color:#ddd; padding:1rem 0; }
 .empty-state { text-align:center; color:#bbb; padding:2rem 0; }
