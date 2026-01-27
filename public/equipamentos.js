@@ -242,8 +242,10 @@ function editEquipment(id) {
     document.getElementById('modelo').value = eq.modelo || '';
     document.getElementById('patrimonio').value = eq.patrimonio || '';
     document.getElementById('numero_serie').value = eq.numero_serie || '';
+    document.getElementById('numero_chamado').value = eq.numero_chamado || '';
     document.getElementById('status_equipamento').value = eq.status_equipamento || '';
     document.getElementById('local_id').value = eq.local_id || '';
+    document.getElementById('tecnico').value = eq.tecnico || '';
     document.getElementById('observacao').value = eq.observacao || '';
 
     document.getElementById('equipment-modal').classList.add('active');
@@ -310,6 +312,14 @@ function showDetails(id) {
             <span class="details-value">${getLocalName(eq.local_id)}</span>
         </div>
         <div class="details-row">
+            <div class="details-label">Número do Chamado:</div>
+            ${safe(eq.numero_chamado)}
+        </div>
+        <div class="details-row">
+            <div class="details-label">Técnico:</div>
+            ${safe(eq.tecnico)}
+        </div>
+        <div class="details-row">
             <div class="details-label">Obs:</div>
             ${safe(eq.observacao)}
         </div>
@@ -331,10 +341,12 @@ async function handleFormSubmit(e) {
     modelo: modelo.value,
     patrimonio: patrimonio.value,
     numero_serie: numero_serie.value,
+        numero_chamado: numero_chamado?.value || '',
     status_equipamento: status_equipamento.value,
     local_id: local_id.value ? Number(local_id.value) : null,
     data_cadastro: data_cadastro.value,
-    observacao: observacao.value
+        observacao: observacao.value,
+        tecnico: tecnico?.value || ''
   };
 
   try {
