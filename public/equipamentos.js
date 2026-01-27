@@ -261,6 +261,22 @@ function closeDetailsModal() {
 }
 
 // ===============================
+// Form helpers
+// ===============================
+function resetForm() {
+    const form = document.getElementById('equipment-form');
+    if (form) form.reset();
+
+    const idEl = document.getElementById('equipment-id');
+    if (idEl) idEl.value = '';
+
+    currentEditingId = null;
+
+    // garante que a data de cadastro volte ao padrão
+    try { setDefaultDate(); } catch (e) { /* ignore */ }
+}
+
+// ===============================
 // Detalhes
 // ===============================
 function showDetails(id) {
