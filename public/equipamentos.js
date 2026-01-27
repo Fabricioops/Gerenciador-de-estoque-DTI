@@ -286,13 +286,33 @@ function showDetails(id) {
     window.lastSelectedEquipmentId = id; // 🔴 ESSENCIAL
 
     const el = document.getElementById('equipment-details');
+    const safe = v => (v === null || v === undefined || v === '') ? '<span class="details-value null">n/a</span>' : `<span class="details-value">${v}</span>`;
+
     el.innerHTML = `
-        <div><strong>Tipo:</strong> ${eq.tipo_equipamento}</div>
-        <div><strong>Marca:</strong> ${eq.marca}</div>
-        <div><strong>Modelo:</strong> ${eq.modelo}</div>
-        <div><strong>Status:</strong> ${getStatusLabel(eq.status_equipamento)}</div>
-        <div><strong>Local:</strong> ${getLocalName(eq.local_id)}</div>
-        <div><strong>Obs:</strong> ${eq.observacao || ''}</div>
+        <div class="details-row">
+            <div class="details-label">Tipo:</div>
+            ${safe(eq.tipo_equipamento)}
+        </div>
+        <div class="details-row">
+            <div class="details-label">Marca:</div>
+            ${safe(eq.marca)}
+        </div>
+        <div class="details-row">
+            <div class="details-label">Modelo:</div>
+            ${safe(eq.modelo)}
+        </div>
+        <div class="details-row">
+            <div class="details-label">Status:</div>
+            <span class="details-value">${getStatusLabel(eq.status_equipamento)}</span>
+        </div>
+        <div class="details-row">
+            <div class="details-label">Local:</div>
+            <span class="details-value">${getLocalName(eq.local_id)}</span>
+        </div>
+        <div class="details-row">
+            <div class="details-label">Obs:</div>
+            ${safe(eq.observacao)}
+        </div>
     `;
 
     document.getElementById('details-modal').classList.add('active');
