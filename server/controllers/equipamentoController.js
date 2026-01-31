@@ -3,7 +3,7 @@ const { executeQuery } = require('../db');
 // Controller simples para listar equipamentos
 exports.list = async (req, res) => {
   try {
-    const sql = 'SELECT * FROM Equipamentos ORDER BY id DESC LIMIT 500  ';
+    const sql = 'SELECT * FROM Equipamentos ORDER BY id DESC LIMIT 1000  ';
     const rows = await executeQuery(sql);
     res.json(rows);
   } catch (err) {
