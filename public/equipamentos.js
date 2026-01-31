@@ -335,21 +335,24 @@ function showDetails(id) {
 async function handleFormSubmit(e) {
   e.preventDefault();
 
-  const payload = {
-    tipo_equipamento: tipo_equipamento.value,
-    marca: marca.value,
-    modelo: modelo.value,
-    patrimonio: patrimonio.value,
-    numero_serie: numero_serie.value,
-        numero_chamado: numero_chamado?.value || '',
-    status_equipamento: status_equipamento.value,
-    local_id: local_id.value ? Number(local_id.value) : null,
-    data_cadastro: data_cadastro.value,
-        observacao: observacao.value,
-        tecnico: tecnico?.value || ''
-  };
+    const get = id => document.getElementById(id);
+
+    const payload = {
+        tipo_equipamento: get('tipo_equipamento')?.value || '',
+        marca: get('marca')?.value || '',
+        modelo: get('modelo')?.value || '',
+        patrimonio: get('patrimonio')?.value || '',
+        numero_serie: get('numero_serie')?.value || '',
+        numero_chamado: get('numero_chamado')?.value || '',
+        status_equipamento: get('status_equipamento')?.value || '',
+        local_id: get('local_id')?.value ? Number(get('local_id').value) : null,
+        data_cadastro: get('data_cadastro')?.value || null,
+        observacao: get('observacao')?.value || '',
+        tecnico: get('tecnico')?.value || ''
+    };
 
   try {
+        console.log('Payload enviado:', payload);
     const method = currentEditingId ? 'PUT' : 'POST';
     const url = currentEditingId
       ? `${API_BASE_URL}/equipamentos/${currentEditingId}`
