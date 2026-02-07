@@ -20,7 +20,11 @@ exports.create = async (req, res) => {
       tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado,
       status_equipamento, local_id, data_cadastro, observacao, tecnico
     } = req.body;
-
+    
+    // Validação: campo `tecnico` obrigatório
+    if (!tecnico || (typeof tecnico === 'string' && tecnico.trim() === '')) {
+      return res.status(400).json({ message: 'O campo tecnico é obrigatório' });
+    }
     const sql = `INSERT INTO Equipamentos (tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado, status_equipamento, local_id, data_cadastro, observacao, tecnico)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const params = [
@@ -34,7 +38,7 @@ exports.create = async (req, res) => {
       local_id || null,
       data_cadastro || null,
       observacao || null,
-      tecnico || null
+      tecnico && typeof tecnico === 'string' ? tecnico.trim() : tecnico
     ];
     console.log('Executando INSERT:', sql, 'params:', params);
     const result = await executeQuery(sql, params);
@@ -69,7 +73,11 @@ exports.update = async (req, res) => {
       tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado,
       status_equipamento, local_id, data_cadastro, observacao, tecnico
     } = req.body;
-
+    
+    // Validação: campo `tecnico` obrigatório
+    if (!tecnico || (typeof tecnico === 'string' && tecnico.trim() === '')) {
+      return res.status(400).json({ message: 'O campo tecnico é obrigatório' });
+    }
     const sql = `UPDATE Equipamentos SET tipo_equipamento = ?, marca = ?, modelo = ?, patrimonio = ?, numero_serie = ?, numero_chamado = ?, status_equipamento = ?, local_id = ?, data_cadastro = ?, observacao = ?, tecnico = ? WHERE id = ?`;
     const params = [
       tipo_equipamento,
@@ -82,7 +90,7 @@ exports.update = async (req, res) => {
       local_id || null,
       data_cadastro || null,
       observacao || null,
-      tecnico || null,
+      tecnico && typeof tecnico === 'string' ? tecnico.trim() : tecnico,
       id
     ];
     console.log('Executando UPDATE:', sql, 'params:', params);

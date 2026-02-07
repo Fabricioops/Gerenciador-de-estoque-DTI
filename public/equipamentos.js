@@ -336,6 +336,13 @@ async function handleFormSubmit(e) {
   e.preventDefault();
 
     const get = id => document.getElementById(id);
+    // Validação cliente: técnico obrigatório
+    const tecnicoVal = get('tecnico')?.value ? get('tecnico').value.trim() : '';
+    if (!tecnicoVal) {
+        showToast('O campo Técnico é obrigatório', 'error');
+        get('tecnico')?.focus();
+        return;
+    }
 
     const payload = {
         tipo_equipamento: get('tipo_equipamento')?.value || '',
@@ -348,7 +355,7 @@ async function handleFormSubmit(e) {
         local_id: get('local_id')?.value ? Number(get('local_id').value) : null,
         data_cadastro: get('data_cadastro')?.value || null,
         observacao: get('observacao')?.value || '',
-        tecnico: get('tecnico')?.value || ''
+        tecnico: tecnicoVal
     };
 
   try {
