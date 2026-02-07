@@ -189,20 +189,22 @@ function filterEquipments() {
     const status = document.getElementById('status-filter')?.value || '';
     const local = document.getElementById('local-filter')?.value || '';
 
-    filteredEquipments = equipments.filter(eq => {
-        const matchesSearch =
-            !search ||
-            (eq.tipo_equipamento || '').toLowerCase().includes(search) ||
-            (eq.marca || '').toLowerCase().includes(search) ||
-            (eq.modelo || '').toLowerCase().includes(search) ||
-            (eq.patrimonio && String(eq.patrimonio).toLowerCase().includes(search)) ||
-            (eq.numero_serie && String(eq.numero_serie).toLowerCase().includes(search));
+        filteredEquipments = equipments.filter(eq => {
+                const matchesSearch =
+                        !search ||
+                        (eq.tipo_equipamento || '').toLowerCase().includes(search) ||
+                        (eq.marca || '').toLowerCase().includes(search) ||
+                        (eq.modelo || '').toLowerCase().includes(search) ||
+                        (eq.patrimonio && String(eq.patrimonio).toLowerCase().includes(search)) ||
+                        (eq.numero_serie && String(eq.numero_serie).toLowerCase().includes(search)) ||
+                        (eq.numero_chamado && String(eq.numero_chamado).toLowerCase().includes(search)) ||
+                        (eq.tecnico || '').toLowerCase().includes(search);
 
-          const matchesStatus = !status || eq.status_equipamento === status;
-          const matchesLocal = !local || (eq.local_id != null && String(eq.local_id) === local);
+                    const matchesStatus = !status || eq.status_equipamento === status;
+                    const matchesLocal = !local || (eq.local_id != null && String(eq.local_id) === local);
 
-        return matchesSearch && matchesStatus && matchesLocal;
-    });
+                return matchesSearch && matchesStatus && matchesLocal;
+        });
 
     renderEquipments();
 }
