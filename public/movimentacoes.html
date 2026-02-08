@@ -1,18 +1,241 @@
-<!doctype html>
-<html lang="pt-br">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Movimentações - Estoque DTI</title>
-  <link rel="stylesheet" href="/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimentações - Sistema de Estoque DTI</title>
+    <link rel="stylesheet" href="movimentacoes.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <div id="site-header"></div>
-  <main>
-    <h1>Movimentações</h1>
-    <p>Lista de movimentações do estoque.</p>
-  </main>
-  <script src="src/header.js"></script>
-  <script src="/script.js"></script>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-server"></i>
+                <span>Estoque DTI</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="equipamentos.html" class="nav-link">Equipamentos</a>
+                <a href="movimentacoes.html" class="nav-link active">Movimentações</a>
+                <a href="relatorios.html" class="nav-link">Relatórios</a>
+            </nav>
+
+            <div class="user-section">
+                <span id="user-name">Olá, Usuário</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Title -->
+        <div class="page-header">
+            <h1>
+                <i class="fas fa-exchange-alt"></i>
+                Registro de Movimentações
+            </h1>
+            <button class="btn-primary" onclick="openAddMovementModal()">
+                <i class="fas fa-plus"></i> Nova Movimentação
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <div class="date-range">
+                <div class="date-input">
+                    <label for="date-from">De:</label>
+                    <input type="date" id="date-from">
+                </div>
+                <div class="date-input">
+                    <label for="date-to">Até:</label>
+                    <input type="date" id="date-to">
+                </div>
+            </div>
+
+            <select id="movement-type" class="filter-select">
+                <option value="">Todos os Tipos</option>
+                <option value="ENTRADA">Entrada</option>
+                <option value="SAIDA">Saída</option>
+                <option value="TRANSFERENCIA">Transferência</option>
+            </select>
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input 
+                    type="text" 
+                    id="equipment-search" 
+                    placeholder="Buscar equipamento..."
+                >
+            </div>
+
+            <button class="btn-secondary" onclick="applyFilters()">
+                <i class="fas fa-filter"></i> Filtrar
+            </button>
+
+            <button class="btn-secondary" onclick="clearMovementFilters()">
+                <i class="fas fa-times"></i> Limpar
+            </button>
+        </div>
+
+        <!-- Movements Table -->
+        <div class="table-container">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Carregando movimentações...</p>
+            </div>
+
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <h3>Nenhuma movimentação encontrada</h3>
+            </div>
+
+            <table id="movements-table" class="movements-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Equipamento</th>
+                        <th>Tipo</th>
+                        <th>Origem</th>
+                        <th>Destino</th>
+                        <th>Usuário</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="movements-tbody">
+                    <!-- Table rows will be rendered here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination">
+            <!-- Pagination will be rendered here -->
+        </div>
+    </main>
+
+    <!-- Movement Modal -->
+    <div id="movement-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Nova Movimentação</h2>
+                <button class="modal-close" onclick="closeMovementModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="movement-form" class="movement-form">
+                <input type="hidden" id="movement-id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="equipamento_id">Equipamento *</label>
+                        <select id="equipamento_id" required>
+                            <option value="">Selecione um equipamento</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipo_movimentacao">Tipo de Movimentação *</label>
+                        <select id="tipo_movimentacao" required onchange="updateLocationFields()">
+                            <option value="">Selecione...</option>
+                            <option value="ENTRADA">Entrada</option>
+                            <option value="SAIDA">Saída</option>
+                            <option value="TRANSFERENCIA">Transferência</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" id="origem-group" style="display: none;">
+                        <label for="origem_id">Origem *</label>
+                        <select id="origem_id">
+                            <option value="">Selecione...</option>
+                            <option value="1">Descarte Farolândia</option>
+                            <option value="2">Lixo Eletrônico B54</option>
+                            <option value="3">D13</option>
+                            <option value="4">Inventariado Centro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="destino-group" style="display: none;">
+                        <label for="destino_id">Destino *</label>
+                        <select id="destino_id">
+                            <option value="">Selecione...</option>
+                            <option value="1">Descarte Farolândia</option>
+                            <option value="2">Lixo Eletrônico B54</option>
+                            <option value="3">D13</option>
+                            <option value="4">Inventariado Centro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="data_movimentacao">Data da Movimentação *</label>
+                        <input type="date" id="data_movimentacao" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="usuario_id">Usuário Responsável *</label>
+                        <input 
+                            type="text" 
+                            id="usuario_id" 
+                            placeholder="Seu nome"
+                            readonly
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="observacao">Observação</label>
+                    <textarea 
+                        id="observacao" 
+                        placeholder="Adicione observações..."
+                        rows="3"
+                    ></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeMovementModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Movement Details Modal -->
+    <div id="movement-details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalhes da Movimentação</h2>
+                <button class="modal-close" onclick="closeMovementDetailsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="movement-details" class="movement-details">
+                <!-- Details will be rendered here -->
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeMovementDetailsModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="movimentacoes.js"></script>
 </body>
 </html>
+
+
+
