@@ -39,6 +39,14 @@ function loadUserInfo() {
         if (el && user.nome) {
             el.textContent = user.nome;
         }
+        // Mostra controles de admin no frontend (botão +Status)
+        try {
+            const addStatusBtn = document.getElementById('add-status-btn');
+            if (addStatusBtn) {
+                if (user.permissao && String(user.permissao).toUpperCase() === 'ADMIN') addStatusBtn.style.display = 'inline-block';
+                else addStatusBtn.style.display = 'none';
+            }
+        } catch (e) {}
     } catch {
         // ignora erro
     }
@@ -57,10 +65,30 @@ function setupEventListeners() {
     if (statusFilter) statusFilter.addEventListener('change', filterEquipments);
 
     const localFilter = document.getElementById('local-filter');
-    if (localFilter) localFilter.addEventListener('change', filterEquipments);
+    if (localFilter) {
+        localFilter.addEventListener('change', (e) => {
+            if (e.target.value === '__add_local__') {
+                openMetaModal('local', e.target);
+            } else {
+                filterEquipments();
+            }
+        });
+    }
+
+    const localSelect = document.getElementById('local_id');
+    if (localSelect) {
+        localSelect.addEventListener('change', (e) => {
+            if (e.target.value === '__add_local__') {
+                openMetaModal('local', e.target);
+            }
+        });
+    }
 
     const form = document.getElementById('equipment-form');
     if (form) form.addEventListener('submit', handleFormSubmit);
+
+    const addStatusBtn = document.getElementById('add-status-btn');
+    if (addStatusBtn) addStatusBtn.addEventListener('click', () => openMetaModal('status', null));
 
     const equipmentModal = document.getElementById('equipment-modal');
     if (equipmentModal) {
@@ -99,6 +127,148 @@ function setDefaultDate() {
     const input = document.getElementById('data_cadastro');
     if (!input) return;
     input.value = new Date().toISOString().split('T')[0];
+}
+
+// Modal / criação de meta (local / status)
+let metaPendingSelect = null;
+
+function openMetaModal(type, selectEl = null) {
+    metaPendingSelect = selectEl;
+    const modal = document.getElementById('meta-modal');
+    const title = document.getElementById('meta-modal-title');
+    const typeInput = document.getElementById('meta-type');
+    const localFields = document.getElementById('meta-local-fields');
+    const statusFields = document.getElementById('meta-status-fields');
+
+    typeInput.value = type;
+    if (type === 'local') {
+        title.textContent = 'Adicionar Local';
+        localFields.style.display = '';
+        statusFields.style.display = 'none';
+        document.getElementById('meta-local-nome').value = '';
+    } else if (type === 'status') {
+        title.textContent = 'Adicionar Status';
+        localFields.style.display = 'none';
+        statusFields.style.display = '';
+        document.getElementById('meta-status-chave').value = '';
+        document.getElementById('meta-status-label').value = '';
+    }
+
+    modal.classList.add('active');
+}
+
+function closeMetaModal() {
+    const modal = document.getElementById('meta-modal');
+    modal.classList.remove('active');
+    // Se um select estava no estado add, reseta
+    try {
+        if (metaPendingSelect && metaPendingSelect.value === '__add_local__') metaPendingSelect.value = '';
+    } catch (e) {}
+    metaPendingSelect = null;
+}
+
+async function submitMetaForm() {
+    const type = document.getElementById('meta-type').value;
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.permissao || String(user.permissao).toUpperCase() !== 'ADMIN') {
+        showToast('Apenas administradores podem criar', 'error');
+        closeMetaModal();
+        return;
+    }
+
+    if (type === 'local') {
+        const nome = document.getElementById('meta-local-nome').value?.trim();
+        const descricao = document.getElementById('meta-local-descricao').value?.trim();
+        const campus = document.getElementById('meta-local-campus').value?.trim();
+        if (!nome) return showToast('Nome do local é obrigatório', 'error');
+        // tenta criar via API
+        try {
+            const res = await fetch(`${API_BASE_URL}/meta/locais`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ nome, descricao, campus })
+            });
+            if (res.ok) {
+                const created = await res.json();
+                addLocalOptionToSelects(created.id, created.nome || nome);
+                if (metaPendingSelect) metaPendingSelect.value = String(created.id);
+                showToast('Local criado', 'success');
+                closeMetaModal();
+                filterEquipments();
+                return;
+            } else {
+                const err = await res.json().catch(() => ({}));
+                showToast(err.message || 'Erro ao criar local', 'error');
+                return;
+            }
+        } catch (err) {
+            console.warn('API create local failed', err);
+            // fallback local
+            const syntheticId = -Date.now();
+            addLocalOptionToSelects(syntheticId, nome);
+            if (metaPendingSelect) metaPendingSelect.value = String(syntheticId);
+            showToast('Local adicionado localmente (sem persistência)', 'info');
+            closeMetaModal();
+            filterEquipments();
+            return;
+        }
+    }
+
+    if (type === 'status') {
+        const chave = document.getElementById('meta-status-chave').value?.trim();
+        const label = document.getElementById('meta-status-label').value?.trim();
+        if (!chave || !label) return showToast('Chave e rótulo são obrigatórios', 'error');
+        try {
+            const res = await fetch(`${API_BASE_URL}/meta/statuses`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ chave, label })
+            });
+            if (res.ok) {
+                const created = await res.json();
+                addStatusOptionToSelects(created.chave || chave, created.label || label);
+                showToast('Status criado', 'success');
+                closeMetaModal();
+                return;
+            } else {
+                const err = await res.json().catch(() => ({}));
+                showToast(err.message || 'Erro ao criar status', 'error');
+                return;
+            }
+        } catch (err) {
+            console.warn('API create status failed', err);
+            showToast('Falha ao criar status', 'error');
+            return;
+        }
+    }
+}
+
+function addStatusOptionToSelects(chave, label) {
+    const selectors = [document.getElementById('status-filter'), document.getElementById('status_equipamento')];
+    selectors.forEach(sel => {
+        if (!sel) return;
+        if (Array.from(sel.options).some(o => o.value == String(chave))) return;
+        const opt = document.createElement('option');
+        opt.value = String(chave);
+        opt.text = label;
+        sel.appendChild(opt);
+    });
+}
+
+function addLocalOptionToSelects(id, nome) {
+    const selectors = [document.getElementById('local-filter'), document.getElementById('local_id')];
+    selectors.forEach(sel => {
+        if (!sel) return;
+        // evita duplicatas
+        if (Array.from(sel.options).some(o => o.value == String(id))) return;
+        const opt = document.createElement('option');
+        opt.value = String(id);
+        opt.text = nome;
+        // insere antes da opção de criação, se existir
+        const addOpt = Array.from(sel.options).find(o => o.value === '__add_local__');
+        if (addOpt) sel.insertBefore(opt, addOpt);
+        else sel.appendChild(opt);
+    });
 }
 
 // ===============================

@@ -34,6 +34,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           errorMessage.style.display = "none";
           // Salva informações do usuário (ex: no localStorage)
           localStorage.setItem("user", JSON.stringify(data.user));
+          // Salva token para uso em chamadas autenticadas
+          if (data.token) localStorage.setItem('token', data.token);
 
           // Mostrar o dashboard embutido no index.html (single-page flow)
       const loginContainer = document.getElementById('login-container');

@@ -34,12 +34,14 @@
                     <option value="INVENTARIADO">Inventariado</option>
                     <option value="QUEIMADO">Queimado</option>
                 </select>
+                <button id="add-status-btn" class="btn-secondary" type="button" style="margin-left:6px;display:none">+ Status</button>
                 <select id="local-filter">
                     <option value="">Todos os Locais</option>
                     <option value="1">Descarte Farolândia</option>
                     <option value="2">Lixo Eletrônico B54</option>
                     <option value="3">D13</option>
                     <option value="4">Inventariado Centro</option>
+                    <option value="__add_local__">+ Adicionar novo local</option>
                 </select>
                 <button class="btn-secondary" onclick="clearFilters()">
                     <i class="fas fa-times"></i> Limpar
@@ -139,6 +141,7 @@
                                 <option value="2">Lixo Eletrônico B54</option>
                                 <option value="3">D13</option>
                                 <option value="4">Inventariado Centro</option>
+                                <option value="__add_local__">+ Adicionar novo local</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -193,6 +196,43 @@
 
     <!-- Toast Notifications -->
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- Modal para criar Local / Status (admin) -->
+    <div class="modal-overlay" id="meta-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="meta-modal-title">Adicionar</h3>
+                <button class="close-btn" onclick="closeMetaModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="meta-form">
+                    <input type="hidden" id="meta-type" value="">
+
+                    <div id="meta-local-fields">
+                        <label for="meta-local-nome">Nome do local</label>
+                        <input id="meta-local-nome" type="text" />
+                        <label for="meta-local-descricao">Descrição</label>
+                        <textarea id="meta-local-descricao" rows="3" placeholder="Descrição do local"></textarea>
+                        <label for="meta-local-campus">Campus</label>
+                        <input id="meta-local-campus" type="text" placeholder="Ex: Farolândia / Centro" />
+                    </div>
+
+                    <div id="meta-status-fields" style="display:none">
+                        <label for="meta-status-chave">Chave do status</label>
+                        <input id="meta-status-chave" type="text" placeholder="EX: FUNCIONANDO" />
+                        <label for="meta-status-label">Rótulo do status</label>
+                        <input id="meta-status-label" type="text" placeholder="Funcionando" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeMetaModal()">Cancelar</button>
+                <button type="button" class="btn-primary" onclick="submitMetaForm()">Criar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="src/header.js"></script>
     <script src="script.js"></script>
