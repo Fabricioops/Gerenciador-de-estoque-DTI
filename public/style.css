@@ -146,6 +146,37 @@ body {
     font-weight: bold;
 }
 
+/* Botão de menu para telas pequenas */
+.nav-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.6rem;
+    cursor: pointer;
+}
+
+/* Menu responsivo: esconde horizontal e mostra toggle */
+@media (max-width: 800px) {
+    .main-header { position: relative; }
+    .nav-toggle { display: block; }
+    .main-nav {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100%;
+        background: #2c2c2c;
+        flex-direction: column;
+        gap: 0;
+        padding: 0.5rem 1rem;
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
+    }
+    .main-nav.open { display: flex; }
+    .main-nav a { padding: 0.75rem 0; margin: 0; border-bottom: none; }
+}
+
 .dashboard-content {
     padding: 30px;
     width: 100%;
