@@ -33,7 +33,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           console.log("Login bem-sucedido:", data);
           errorMessage.style.display = "none";
           // Salva informações do usuário (ex: no localStorage)
-          localStorage.setItem("user", JSON.stringify(data.user));
+          // Normaliza a permissão para evitar discrepâncias (ex: 'admin', 1, true)
+          try {
+            const normalizedUser = Object.assign({}, data.user || {});
+            normalizedUser.permissao = String((data.user && data.user.permissao) || '').toUpperCase();
+            localStorage.setItem('user', JSON.stringify(normalizedUser));
+          } catch (e) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+          }
           // Salva token para uso em chamadas autenticadas
           if (data.token) localStorage.setItem('token', data.token);
 

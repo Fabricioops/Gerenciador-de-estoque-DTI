@@ -5,6 +5,12 @@ let equipments = [];
 let filteredEquipments = [];
 let currentEditingId = null;
 
+// metas (locais/statuses) carregadas do servidor
+let locais = [];
+let statuses = [];
+let locaisById = {};
+let statusesByKey = {};
+
 // ===============================
 // Configuração da API
 // ===============================
@@ -14,10 +20,11 @@ const API_BASE_URL = 'http://localhost:3000/api';
 // Inicialização da página
 // ===============================
 document.addEventListener('DOMContentLoaded', () => {
-    const init = () => {
+    const init = async () => {
         loadUserInfo();
         setupEventListeners();
-        loadEquipments();
+        await loadMetas();
+        await loadEquipments();
         setDefaultDate();
     };
 
@@ -176,7 +183,7 @@ async function submitMetaForm() {
         return;
     }
 
-    if (type === 'local') {
+        if (type === 'local') {
         const nome = document.getElementById('meta-local-nome').value?.trim();
         const descricao = document.getElementById('meta-local-descricao').value?.trim();
         const campus = document.getElementById('meta-local-campus').value?.trim();
@@ -197,9 +204,23 @@ async function submitMetaForm() {
                 filterEquipments();
                 return;
             } else {
-                const err = await res.json().catch(() => ({}));
-                showToast(err.message || 'Erro ao criar local', 'error');
-                return;
+                    const err = await res.json().catch(() => ({}));
+                    // Se local já existe (409), recarrega lista de locais e seleciona o existente
+                    if (res.status === 409) {
+                        await loadMetas();
+                        // tenta achar por nome (case-insensitive)
+                        const found = locais.find(l => String(l.nome).trim().toLowerCase() === String(nome).trim().toLowerCase());
+                        if (found) {
+                            addLocalOptionToSelects(found.id, found.nome);
+                            if (metaPendingSelect) metaPendingSelect.value = String(found.id);
+                            showToast('Local já existe — selecionado', 'info');
+                            closeMetaModal();
+                            filterEquipments();
+                            return;
+                        }
+                    }
+                    showToast(err.message || 'Erro ao criar local', 'error');
+                    return;
             }
         } catch (err) {
             console.warn('API create local failed', err);
@@ -268,6 +289,90 @@ function addLocalOptionToSelects(id, nome) {
         const addOpt = Array.from(sel.options).find(o => o.value === '__add_local__');
         if (addOpt) sel.insertBefore(opt, addOpt);
         else sel.appendChild(opt);
+    });
+}
+
+// ===============================
+// Carrega metas (locais/statuses) do servidor
+// ===============================
+async function loadMetas() {
+    try {
+        // locais
+        const resLocais = await fetch(`${API_BASE_URL}/meta/locais`);
+        if (resLocais.ok) {
+            locais = await resLocais.json();
+            locaisById = {};
+            locais.forEach(l => { locaisById[String(l.id)] = l; });
+        } else {
+            locais = [];
+            locaisById = {};
+        }
+
+        // statuses
+        const resStatuses = await fetch(`${API_BASE_URL}/meta/statuses`);
+        if (resStatuses.ok) {
+            statuses = await resStatuses.json();
+            statusesByKey = {};
+            statuses.forEach(s => { statusesByKey[String(s.chave)] = s; });
+        } else {
+            statuses = [];
+            statusesByKey = {};
+        }
+
+        // Atualiza selects na UI
+        populateLocalSelects();
+        populateStatusSelects();
+    } catch (err) {
+        console.warn('loadMetas failed', err);
+        locais = [];
+        statuses = [];
+        locaisById = {};
+        statusesByKey = {};
+    }
+}
+
+function populateLocalSelects() {
+    const selectors = [document.getElementById('local-filter'), document.getElementById('local_id')];
+    selectors.forEach(sel => {
+        if (!sel) return;
+        const existingValues = new Set(Array.from(sel.options).map(o => String(o.value)));
+        const addOpt = Array.from(sel.options).find(o => o.value === '__add_local__');
+
+        // Adiciona ou atualiza locais sem remover opções existentes
+        locais.forEach(l => {
+            const val = String(l.id);
+            const existing = Array.from(sel.options).find(o => String(o.value) === val);
+            if (existing) {
+                if (existing.text !== l.nome) existing.text = l.nome;
+            } else {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.text = l.nome;
+                if (addOpt) sel.insertBefore(opt, addOpt);
+                else sel.appendChild(opt);
+            }
+        });
+    });
+}
+
+function populateStatusSelects() {
+    const selectors = [document.getElementById('status-filter'), document.getElementById('status_equipamento')];
+    selectors.forEach(sel => {
+        if (!sel) return;
+        const existingValues = new Set(Array.from(sel.options).map(o => String(o.value)));
+
+        statuses.forEach(s => {
+            const val = String(s.chave);
+            const existing = Array.from(sel.options).find(o => String(o.value) === val);
+            if (existing) {
+                if (existing.text !== s.label) existing.text = s.label;
+            } else {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.text = s.label;
+                sel.appendChild(opt);
+            }
+        });
     });
 }
 
@@ -625,6 +730,8 @@ function showToast(msg, type = 'info') {
 }
 
 function getStatusLabel(status) {
+    // tenta buscar no cache carregado da API
+    if (status && statusesByKey && statusesByKey[String(status)]) return statusesByKey[String(status)].label;
     return {
         FUNCIONANDO: 'Funcionando',
         PARA_DESCARTE: 'Para Descarte',
@@ -634,6 +741,8 @@ function getStatusLabel(status) {
 }
 
 function getLocalName(id) {
+    // tenta buscar no cache carregado da API
+    if (id != null && locaisById && locaisById[String(id)]) return locaisById[String(id)].nome;
     return {
         1: 'Descarte Farolândia',
         2: 'Lixo Eletrônico B54',
