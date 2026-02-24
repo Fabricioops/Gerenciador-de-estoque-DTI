@@ -173,6 +173,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (dashboardContainer && dashboardContainer.style.display !== 'none') {
     loadDashboardData();
   }
+
+  // Polling: atualiza o dashboard a cada 30 segundos quando visível
+  setInterval(() => {
+    const dc = document.getElementById('dashboard-container');
+    if (dc && dc.style.display !== 'none') {
+      try {
+        loadDashboardData();
+      } catch (e) {
+        console.warn('Erro no polling do dashboard:', e);
+      }
+    }
+  }, 30000);
 });
 
 // Função que carrega o header compartilhado (`header.html`) e injetá-lo
