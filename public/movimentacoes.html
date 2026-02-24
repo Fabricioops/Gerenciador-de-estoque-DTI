@@ -4,34 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movimentações - Sistema de Estoque DTI</title>
+    <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="movimentacoes.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <i class="fas fa-server"></i>
-                <span>Estoque DTI</span>
-            </div>
-            
-            <nav class="nav-menu">
-                <button id="nav-toggle" class="nav-toggle" aria-controls="nav-menu" aria-expanded="false" aria-label="Abrir menu">☰</button>
-                <a href="dashboard.html" class="nav-link">Dashboard</a>
-                <a href="equipamentos.html" class="nav-link">Equipamentos</a>
-                <a href="movimentacoes.html" class="nav-link active">Movimentações</a>
-                <a href="relatorios.html" class="nav-link">Relatórios</a>
-            </nav>
-
-            <div class="user-section">
-                <span id="user-name">Olá, Usuário</span>
-                <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+    <div id="site-header"></div>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -234,6 +212,8 @@
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
 
+    <script src="src/header.js"></script>
+    <script src="script.js"></script>
     <script src="movimentacoes.js"></script>
 </body>
 </html>

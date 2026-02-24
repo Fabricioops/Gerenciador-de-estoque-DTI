@@ -6,7 +6,12 @@
 //   inicializa os gráficos Chart.js com os dados retornados.
 // - Adicionados handlers de logout e checagem inicial para manter sessão via localStorage.
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadSharedHeader();
+  // Evita carregar o header duas vezes: se `src/header.js` já expôs `window.headerReady`, aguarda essa promise
+  if (window.headerReady && typeof window.headerReady.then === 'function') {
+    try { await window.headerReady; } catch (e) { /* ignore */ }
+  } else {
+    await loadSharedHeader();
+  }
   const loginForm = document.getElementById("login-form");
   const errorMessage = document.getElementById("error-message");
 
