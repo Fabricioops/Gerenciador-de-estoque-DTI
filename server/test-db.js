@@ -6,6 +6,7 @@
 // - Serve apenas para desenvolvimento/diagnóstico; não faz alterações no banco.
 const { connectDB, executeQuery } = require('./db');
 
+
 (async () => {
   try {
     console.log('Conectando ao MySQL...');
