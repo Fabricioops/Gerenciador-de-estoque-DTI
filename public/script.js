@@ -6,7 +6,12 @@
 //   inicializa os gráficos Chart.js com os dados retornados.
 // - Adicionados handlers de logout e checagem inicial para manter sessão via localStorage.
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadSharedHeader();
+  // Evita carregar o header duas vezes: se `src/header.js` já expôs `window.headerReady`, aguarda essa promise
+  if (window.headerReady && typeof window.headerReady.then === 'function') {
+    try { await window.headerReady; } catch (e) { /* ignore */ }
+  } else {
+    await loadSharedHeader();
+  }
   const loginForm = document.getElementById("login-form");
   const errorMessage = document.getElementById("error-message");
 
@@ -33,7 +38,16 @@ document.addEventListener("DOMContentLoaded", async () => {
           console.log("Login bem-sucedido:", data);
           errorMessage.style.display = "none";
           // Salva informações do usuário (ex: no localStorage)
-          localStorage.setItem("user", JSON.stringify(data.user));
+          // Normaliza a permissão para evitar discrepâncias (ex: 'admin', 1, true)
+          try {
+            const normalizedUser = Object.assign({}, data.user || {});
+            normalizedUser.permissao = String((data.user && data.user.permissao) || '').toUpperCase();
+            localStorage.setItem('user', JSON.stringify(normalizedUser));
+          } catch (e) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+          }
+          // Salva token para uso em chamadas autenticadas
+          if (data.token) localStorage.setItem('token', data.token);
 
           // Mostrar o dashboard embutido no index.html (single-page flow)
       const loginContainer = document.getElementById('login-container');
@@ -164,6 +178,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (dashboardContainer && dashboardContainer.style.display !== 'none') {
     loadDashboardData();
   }
+
+  // Polling: atualiza o dashboard a cada 30 segundos quando visível
+  setInterval(() => {
+    const dc = document.getElementById('dashboard-container');
+    if (dc && dc.style.display !== 'none') {
+      try {
+        loadDashboardData();
+      } catch (e) {
+        console.warn('Erro no polling do dashboard:', e);
+      }
+    }
+  }, 30000);
 });
 
 // Função que carrega o header compartilhado (`header.html`) e injetá-lo

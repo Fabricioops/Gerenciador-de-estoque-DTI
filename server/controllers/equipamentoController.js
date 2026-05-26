@@ -15,14 +15,19 @@ exports.list = async (req, res) => {
 // Cria um novo equipamento
 exports.create = async (req, res) => {
   try {
+    console.log('Create payload recebido:', req.body);
     const {
       tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado,
       status_equipamento, local_id, data_cadastro, observacao, tecnico
     } = req.body;
-
+    
+    // Validação: campo `tecnico` obrigatório
+    if (!tecnico || (typeof tecnico === 'string' && tecnico.trim() === '')) {
+      return res.status(400).json({ message: 'O campo tecnico é obrigatório' });
+    }
     const sql = `INSERT INTO Equipamentos (tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado, status_equipamento, local_id, data_cadastro, observacao, tecnico)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    const result = await executeQuery(sql, [
+    const params = [
       tipo_equipamento,
       marca,
       modelo,
@@ -33,8 +38,10 @@ exports.create = async (req, res) => {
       local_id || null,
       data_cadastro || null,
       observacao || null,
-      tecnico || null
-    ]);
+      tecnico && typeof tecnico === 'string' ? tecnico.trim() : tecnico
+    ];
+    console.log('Executando INSERT:', sql, 'params:', params);
+    const result = await executeQuery(sql, params);
 
     // result pode ser um objeto OkPacket com insertId
     const insertId = result && result.insertId ? result.insertId : null;
@@ -61,13 +68,18 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const id = req.params.id;
+    console.log('Update payload recebido:', req.body, 'id:', id);
     const {
       tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado,
       status_equipamento, local_id, data_cadastro, observacao, tecnico
     } = req.body;
-
+    
+    // Validação: campo `tecnico` obrigatório
+    if (!tecnico || (typeof tecnico === 'string' && tecnico.trim() === '')) {
+      return res.status(400).json({ message: 'O campo tecnico é obrigatório' });
+    }
     const sql = `UPDATE Equipamentos SET tipo_equipamento = ?, marca = ?, modelo = ?, patrimonio = ?, numero_serie = ?, numero_chamado = ?, status_equipamento = ?, local_id = ?, data_cadastro = ?, observacao = ?, tecnico = ? WHERE id = ?`;
-    const result = await executeQuery(sql, [
+    const params = [
       tipo_equipamento,
       marca,
       modelo,
@@ -78,9 +90,11 @@ exports.update = async (req, res) => {
       local_id || null,
       data_cadastro || null,
       observacao || null,
-      tecnico || null,
+      tecnico && typeof tecnico === 'string' ? tecnico.trim() : tecnico,
       id
-    ]);
+    ];
+    console.log('Executando UPDATE:', sql, 'params:', params);
+    const result = await executeQuery(sql, params);
 
     res.json({ affectedRows: result && result.affectedRows ? result.affectedRows : 0, message: 'Equipamento atualizado' });
   } catch (err) {

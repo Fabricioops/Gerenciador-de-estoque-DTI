@@ -12,6 +12,7 @@ const cors = require('cors');
 const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const metaRoutes = require('./routes/metaRoutes');
 const { connectDB, executeQuery } = require("./db"); // Certifique-se de importar executeQuery
 
 
@@ -36,6 +37,8 @@ app.use('/api/dashboard', dashboardRoutes);
 // Rotas de equipamentos (API) - lista e operações relacionadas
 const equipamentoRoutes = require('./routes/equipamentoRoutes');
 app.use('/api/equipamentos', equipamentoRoutes);
+// Rotas de metadados (locais / statuses)
+app.use('/api/meta', metaRoutes);
 
 // Rota de teste
 app.get('/', (req, res) => {

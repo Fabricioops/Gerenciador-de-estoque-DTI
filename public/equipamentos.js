@@ -5,6 +5,12 @@ let equipments = [];
 let filteredEquipments = [];
 let currentEditingId = null;
 
+// metas (locais/statuses) carregadas do servidor
+let locais = [];
+let statuses = [];
+let locaisById = {};
+let statusesByKey = {};
+
 // ===============================
 // Configuração da API
 // ===============================
@@ -14,10 +20,11 @@ const API_BASE_URL = 'http://localhost:3000/api';
 // Inicialização da página
 // ===============================
 document.addEventListener('DOMContentLoaded', () => {
-    const init = () => {
+    const init = async () => {
         loadUserInfo();
         setupEventListeners();
-        loadEquipments();
+        await loadMetas();
+        await loadEquipments();
         setDefaultDate();
     };
 
@@ -39,6 +46,14 @@ function loadUserInfo() {
         if (el && user.nome) {
             el.textContent = user.nome;
         }
+        // Mostra controles de admin no frontend (botão +Status)
+        try {
+            const addStatusBtn = document.getElementById('add-status-btn');
+            if (addStatusBtn) {
+                if (user.permissao && String(user.permissao).toUpperCase() === 'ADMIN') addStatusBtn.style.display = 'inline-block';
+                else addStatusBtn.style.display = 'none';
+            }
+        } catch (e) {}
     } catch {
         // ignora erro
     }
@@ -57,10 +72,30 @@ function setupEventListeners() {
     if (statusFilter) statusFilter.addEventListener('change', filterEquipments);
 
     const localFilter = document.getElementById('local-filter');
-    if (localFilter) localFilter.addEventListener('change', filterEquipments);
+    if (localFilter) {
+        localFilter.addEventListener('change', (e) => {
+            if (e.target.value === '__add_local__') {
+                openMetaModal('local', e.target);
+            } else {
+                filterEquipments();
+            }
+        });
+    }
+
+    const localSelect = document.getElementById('local_id');
+    if (localSelect) {
+        localSelect.addEventListener('change', (e) => {
+            if (e.target.value === '__add_local__') {
+                openMetaModal('local', e.target);
+            }
+        });
+    }
 
     const form = document.getElementById('equipment-form');
     if (form) form.addEventListener('submit', handleFormSubmit);
+
+    const addStatusBtn = document.getElementById('add-status-btn');
+    if (addStatusBtn) addStatusBtn.addEventListener('click', () => openMetaModal('status', null));
 
     const equipmentModal = document.getElementById('equipment-modal');
     if (equipmentModal) {
@@ -99,6 +134,246 @@ function setDefaultDate() {
     const input = document.getElementById('data_cadastro');
     if (!input) return;
     input.value = new Date().toISOString().split('T')[0];
+}
+
+// Modal / criação de meta (local / status)
+let metaPendingSelect = null;
+
+function openMetaModal(type, selectEl = null) {
+    metaPendingSelect = selectEl;
+    const modal = document.getElementById('meta-modal');
+    const title = document.getElementById('meta-modal-title');
+    const typeInput = document.getElementById('meta-type');
+    const localFields = document.getElementById('meta-local-fields');
+    const statusFields = document.getElementById('meta-status-fields');
+
+    typeInput.value = type;
+    if (type === 'local') {
+        title.textContent = 'Adicionar Local';
+        localFields.style.display = '';
+        statusFields.style.display = 'none';
+        document.getElementById('meta-local-nome').value = '';
+    } else if (type === 'status') {
+        title.textContent = 'Adicionar Status';
+        localFields.style.display = 'none';
+        statusFields.style.display = '';
+        document.getElementById('meta-status-chave').value = '';
+        document.getElementById('meta-status-label').value = '';
+    }
+
+    modal.classList.add('active');
+}
+
+function closeMetaModal() {
+    const modal = document.getElementById('meta-modal');
+    modal.classList.remove('active');
+    // Se um select estava no estado add, reseta
+    try {
+        if (metaPendingSelect && metaPendingSelect.value === '__add_local__') metaPendingSelect.value = '';
+    } catch (e) {}
+    metaPendingSelect = null;
+}
+
+async function submitMetaForm() {
+    const type = document.getElementById('meta-type').value;
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.permissao || String(user.permissao).toUpperCase() !== 'ADMIN') {
+        showToast('Apenas administradores podem criar', 'error');
+        closeMetaModal();
+        return;
+    }
+
+        if (type === 'local') {
+        const nome = document.getElementById('meta-local-nome').value?.trim();
+        const descricao = document.getElementById('meta-local-descricao').value?.trim();
+        const campus = document.getElementById('meta-local-campus').value?.trim();
+        if (!nome) return showToast('Nome do local é obrigatório', 'error');
+        // tenta criar via API
+        try {
+            const res = await fetch(`${API_BASE_URL}/meta/locais`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ nome, descricao, campus })
+            });
+            if (res.ok) {
+                const created = await res.json();
+                addLocalOptionToSelects(created.id, created.nome || nome);
+                if (metaPendingSelect) metaPendingSelect.value = String(created.id);
+                showToast('Local criado', 'success');
+                closeMetaModal();
+                filterEquipments();
+                return;
+            } else {
+                    const err = await res.json().catch(() => ({}));
+                    // Se local já existe (409), recarrega lista de locais e seleciona o existente
+                    if (res.status === 409) {
+                        await loadMetas();
+                        // tenta achar por nome (case-insensitive)
+                        const found = locais.find(l => String(l.nome).trim().toLowerCase() === String(nome).trim().toLowerCase());
+                        if (found) {
+                            addLocalOptionToSelects(found.id, found.nome);
+                            if (metaPendingSelect) metaPendingSelect.value = String(found.id);
+                            showToast('Local já existe — selecionado', 'info');
+                            closeMetaModal();
+                            filterEquipments();
+                            return;
+                        }
+                    }
+                    showToast(err.message || 'Erro ao criar local', 'error');
+                    return;
+            }
+        } catch (err) {
+            console.warn('API create local failed', err);
+            // fallback local
+            const syntheticId = -Date.now();
+            addLocalOptionToSelects(syntheticId, nome);
+            if (metaPendingSelect) metaPendingSelect.value = String(syntheticId);
+            showToast('Local adicionado localmente (sem persistência)', 'info');
+            closeMetaModal();
+            filterEquipments();
+            return;
+        }
+    }
+
+    if (type === 'status') {
+        const chave = document.getElementById('meta-status-chave').value?.trim();
+        const label = document.getElementById('meta-status-label').value?.trim();
+        if (!chave || !label) return showToast('Chave e rótulo são obrigatórios', 'error');
+        try {
+            const res = await fetch(`${API_BASE_URL}/meta/statuses`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ chave, label })
+            });
+            if (res.ok) {
+                const created = await res.json();
+                addStatusOptionToSelects(created.chave || chave, created.label || label);
+                showToast('Status criado', 'success');
+                closeMetaModal();
+                return;
+            } else {
+                const err = await res.json().catch(() => ({}));
+                showToast(err.message || 'Erro ao criar status', 'error');
+                return;
+            }
+        } catch (err) {
+            console.warn('API create status failed', err);
+            showToast('Falha ao criar status', 'error');
+            return;
+        }
+    }
+}
+
+function addStatusOptionToSelects(chave, label) {
+    const selectors = [document.getElementById('status-filter'), document.getElementById('status_equipamento')];
+    selectors.forEach(sel => {
+        if (!sel) return;
+        if (Array.from(sel.options).some(o => o.value == String(chave))) return;
+        const opt = document.createElement('option');
+        opt.value = String(chave);
+        opt.text = label;
+        sel.appendChild(opt);
+    });
+}
+
+function addLocalOptionToSelects(id, nome) {
+    const selectors = [document.getElementById('local-filter'), document.getElementById('local_id')];
+    selectors.forEach(sel => {
+        if (!sel) return;
+        // evita duplicatas
+        if (Array.from(sel.options).some(o => o.value == String(id))) return;
+        const opt = document.createElement('option');
+        opt.value = String(id);
+        opt.text = nome;
+        // insere antes da opção de criação, se existir
+        const addOpt = Array.from(sel.options).find(o => o.value === '__add_local__');
+        if (addOpt) sel.insertBefore(opt, addOpt);
+        else sel.appendChild(opt);
+    });
+}
+
+// ===============================
+// Carrega metas (locais/statuses) do servidor
+// ===============================
+async function loadMetas() {
+    try {
+        // locais
+        const resLocais = await fetch(`${API_BASE_URL}/meta/locais`);
+        if (resLocais.ok) {
+            locais = await resLocais.json();
+            locaisById = {};
+            locais.forEach(l => { locaisById[String(l.id)] = l; });
+        } else {
+            locais = [];
+            locaisById = {};
+        }
+
+        // statuses
+        const resStatuses = await fetch(`${API_BASE_URL}/meta/statuses`);
+        if (resStatuses.ok) {
+            statuses = await resStatuses.json();
+            statusesByKey = {};
+            statuses.forEach(s => { statusesByKey[String(s.chave)] = s; });
+        } else {
+            statuses = [];
+            statusesByKey = {};
+        }
+
+        // Atualiza selects na UI
+        populateLocalSelects();
+        populateStatusSelects();
+    } catch (err) {
+        console.warn('loadMetas failed', err);
+        locais = [];
+        statuses = [];
+        locaisById = {};
+        statusesByKey = {};
+    }
+}
+
+function populateLocalSelects() {
+    const selectors = [document.getElementById('local-filter'), document.getElementById('local_id')];
+    selectors.forEach(sel => {
+        if (!sel) return;
+        const existingValues = new Set(Array.from(sel.options).map(o => String(o.value)));
+        const addOpt = Array.from(sel.options).find(o => o.value === '__add_local__');
+
+        // Adiciona ou atualiza locais sem remover opções existentes
+        locais.forEach(l => {
+            const val = String(l.id);
+            const existing = Array.from(sel.options).find(o => String(o.value) === val);
+            if (existing) {
+                if (existing.text !== l.nome) existing.text = l.nome;
+            } else {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.text = l.nome;
+                if (addOpt) sel.insertBefore(opt, addOpt);
+                else sel.appendChild(opt);
+            }
+        });
+    });
+}
+
+function populateStatusSelects() {
+    const selectors = [document.getElementById('status-filter'), document.getElementById('status_equipamento')];
+    selectors.forEach(sel => {
+        if (!sel) return;
+        const existingValues = new Set(Array.from(sel.options).map(o => String(o.value)));
+
+        statuses.forEach(s => {
+            const val = String(s.chave);
+            const existing = Array.from(sel.options).find(o => String(o.value) === val);
+            if (existing) {
+                if (existing.text !== s.label) existing.text = s.label;
+            } else {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.text = s.label;
+                sel.appendChild(opt);
+            }
+        });
+    });
 }
 
 // ===============================
@@ -189,20 +464,22 @@ function filterEquipments() {
     const status = document.getElementById('status-filter')?.value || '';
     const local = document.getElementById('local-filter')?.value || '';
 
-    filteredEquipments = equipments.filter(eq => {
-        const matchesSearch =
-            !search ||
-            (eq.tipo_equipamento || '').toLowerCase().includes(search) ||
-            (eq.marca || '').toLowerCase().includes(search) ||
-            (eq.modelo || '').toLowerCase().includes(search) ||
-            (eq.patrimonio && String(eq.patrimonio).toLowerCase().includes(search)) ||
-            (eq.numero_serie && String(eq.numero_serie).toLowerCase().includes(search));
+        filteredEquipments = equipments.filter(eq => {
+                const matchesSearch =
+                        !search ||
+                        (eq.tipo_equipamento || '').toLowerCase().includes(search) ||
+                        (eq.marca || '').toLowerCase().includes(search) ||
+                        (eq.modelo || '').toLowerCase().includes(search) ||
+                        (eq.patrimonio && String(eq.patrimonio).toLowerCase().includes(search)) ||
+                        (eq.numero_serie && String(eq.numero_serie).toLowerCase().includes(search)) ||
+                        (eq.numero_chamado && String(eq.numero_chamado).toLowerCase().includes(search)) ||
+                        (eq.tecnico || '').toLowerCase().includes(search);
 
-          const matchesStatus = !status || eq.status_equipamento === status;
-          const matchesLocal = !local || (eq.local_id != null && String(eq.local_id) === local);
+                    const matchesStatus = !status || eq.status_equipamento === status;
+                    const matchesLocal = !local || (eq.local_id != null && String(eq.local_id) === local);
 
-        return matchesSearch && matchesStatus && matchesLocal;
-    });
+                return matchesSearch && matchesStatus && matchesLocal;
+        });
 
     renderEquipments();
 }
@@ -335,21 +612,31 @@ function showDetails(id) {
 async function handleFormSubmit(e) {
   e.preventDefault();
 
-  const payload = {
-    tipo_equipamento: tipo_equipamento.value,
-    marca: marca.value,
-    modelo: modelo.value,
-    patrimonio: patrimonio.value,
-    numero_serie: numero_serie.value,
-        numero_chamado: numero_chamado?.value || '',
-    status_equipamento: status_equipamento.value,
-    local_id: local_id.value ? Number(local_id.value) : null,
-    data_cadastro: data_cadastro.value,
-        observacao: observacao.value,
-        tecnico: tecnico?.value || ''
-  };
+    const get = id => document.getElementById(id);
+    // Validação cliente: técnico obrigatório
+    const tecnicoVal = get('tecnico')?.value ? get('tecnico').value.trim() : '';
+    if (!tecnicoVal) {
+        showToast('O campo Técnico é obrigatório', 'error');
+        get('tecnico')?.focus();
+        return;
+    }
+
+    const payload = {
+        tipo_equipamento: get('tipo_equipamento')?.value || '',
+        marca: get('marca')?.value || '',
+        modelo: get('modelo')?.value || '',
+        patrimonio: get('patrimonio')?.value || '',
+        numero_serie: get('numero_serie')?.value || '',
+        numero_chamado: get('numero_chamado')?.value || '',
+        status_equipamento: get('status_equipamento')?.value || '',
+        local_id: get('local_id')?.value ? Number(get('local_id').value) : null,
+        data_cadastro: get('data_cadastro')?.value || null,
+        observacao: get('observacao')?.value || '',
+        tecnico: tecnicoVal
+    };
 
   try {
+        console.log('Payload enviado:', payload);
     const method = currentEditingId ? 'PUT' : 'POST';
     const url = currentEditingId
       ? `${API_BASE_URL}/equipamentos/${currentEditingId}`
@@ -443,6 +730,8 @@ function showToast(msg, type = 'info') {
 }
 
 function getStatusLabel(status) {
+    // tenta buscar no cache carregado da API
+    if (status && statusesByKey && statusesByKey[String(status)]) return statusesByKey[String(status)].label;
     return {
         FUNCIONANDO: 'Funcionando',
         PARA_DESCARTE: 'Para Descarte',
@@ -452,6 +741,8 @@ function getStatusLabel(status) {
 }
 
 function getLocalName(id) {
+    // tenta buscar no cache carregado da API
+    if (id != null && locaisById && locaisById[String(id)]) return locaisById[String(id)].nome;
     return {
         1: 'Descarte Farolândia',
         2: 'Lixo Eletrônico B54',

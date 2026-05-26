@@ -1,18 +1,124 @@
-<!doctype html>
-<html lang="pt-br">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Movimentações - Estoque DTI</title>
-  <link rel="stylesheet" href="/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimentações - Sistema de Estoque DTI</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="movimentacoes.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <div id="site-header"></div>
-  <main>
-    <h1>Movimentações</h1>
-    <p>Lista de movimentações do estoque.</p>
-  </main>
-  <script src="src/header.js"></script>
-  <script src="/script.js"></script>
+    <div id="site-header"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Title -->
+        <div class="page-header">
+            <h1>
+                <i class="fas fa-exchange-alt"></i>
+                Registro de Movimentações
+            </h1>
+            
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <div class="date-range">
+                <div class="date-input">
+                    <label for="date-from">De:</label>
+                    <input type="date" id="date-from">
+                </div>
+                <div class="date-input">
+                    <label for="date-to">Até:</label>
+                    <input type="date" id="date-to">
+                </div>
+            </div>
+
+            <select id="movement-type" class="filter-select">
+                <option value="">Todos os Tipos</option>
+                <option value="ENTRADA">Entrada</option>
+                <option value="SAIDA">Saída</option>
+                <option value="TRANSFERENCIA">Transferência</option>
+            </select>
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input 
+                    type="text" 
+                    id="equipment-search" 
+                    placeholder="Buscar equipamento..."
+                >
+            </div>
+
+            <button class="btn-secondary" onclick="applyFilters()">
+                <i class="fas fa-filter"></i> Filtrar
+            </button>
+
+            <button class="btn-secondary" onclick="clearMovementFilters()">
+                <i class="fas fa-times"></i> Limpar
+            </button>
+        </div>
+
+        <!-- Movements Table -->
+        <div class="table-container">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Carregando movimentações...</p>
+
+
+            </div>
+
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <h3>Nenhuma movimentação encontrada</h3>
+            </div>
+
+            <table id="movements-table" class="movements-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Equipamento</th>
+                        <th>Tipo</th>
+                        <th>Origem</th>
+                        <th>Destino</th>
+                        <th>Técnico</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="movements-tbody">
+                    <!-- Table rows will be rendered here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination">
+            <!-- Pagination will be rendered here -->
+        </div>
+    </main> 
+
+        </div>
+    
+
+            <div id="movement-details" class="movement-details">
+                <!-- Details will be rendered here -->
+            </div>
+
+            <div class="modal-footer">
+               
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    
+    <script src="script.js"></script>
+    <script src="movimentacoes.js"></script>
 </body>
 </html>
+
+
+

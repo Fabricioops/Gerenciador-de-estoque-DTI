@@ -40,6 +40,22 @@
         // não-fatal
       }
 
+      // Configura o botão de toggle do menu (para header injetado ou header estático)
+      try {
+        function setupNavToggle() {
+          const toggle = document.getElementById('nav-toggle');
+          const nav = (placeholder ? placeholder.querySelector('.main-nav') : document.querySelector('.main-nav')) || document.querySelector('.nav-menu');
+          if (!toggle || !nav) return;
+          toggle.addEventListener('click', () => {
+            const opened = nav.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', opened);
+          });
+        }
+        setupNavToggle();
+      } catch (e) {
+        // ignore
+      }
+
       return html;
     })
     .catch(err => {
