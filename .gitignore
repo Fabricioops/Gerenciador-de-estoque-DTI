@@ -143,3 +143,9 @@ build/
 *.iml
 local.properties
 node_modules/
+package-lock.json
+package.json
+
+# IDEs e OS
+.DS_Store
+.vscode/
