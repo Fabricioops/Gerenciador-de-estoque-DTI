@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const { executeQuery } = require('../db'); // Importamos a função executeQuery
 
 // Segredo para o JWT. Em um projeto real, use uma variável de ambiente!
-const JWT_SECRET = 'seu_segredo_super_secreto';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.login = async (req, res) => {
     const { email, senha } = req.body; // O nome da variável aqui deve ser 'senha'
@@ -29,9 +29,10 @@ exports.login = async (req, res) => {
         
 
         //const isPasswordValid = await bcrypt.compare(senha, user.senha);
-
-        const isPasswordValid = (senha === user.senha); // Comparação direta (não seguro, apenas para teste)--------------------------------
-        
+        const isPasswordValid = await bcrypt.compare(
+        senha,
+        user.senha
+        );
 
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Senha inválida.' });

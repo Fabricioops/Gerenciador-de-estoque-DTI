@@ -6,6 +6,7 @@
 // - As rotas da API de dashboard foram registradas em `/api/dashboard`.
 // Essas alterações resolvem o erro de 404 ao redirecionar para `/dashboard.html` e
 // permitem o fluxo single-origin (evitando problemas de localStorage entre portas).
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
@@ -42,8 +43,7 @@ app.use('/api/meta', metaRoutes);
 
 // Rota de teste
 app.get('/', (req, res) => {
-    // Serve the frontend index.html from the public folder so the app can be
-    // accessed at http://localhost:3000/ (same origin as the API).
+    
     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
