@@ -243,3 +243,11 @@ async function loadSharedHeader() {
     console.warn('Não foi possível carregar header compartilhado:', e);
   }
 }
+
+// ==========================================
+// LÓGICA DA TELA DE CADASTRO (CRIAR USUÁRIO)
+// ==========================================
+document.getElementById('btn-criar-user').addEventListener('click', ()=> {
+  window.location.href = '/cadastro-usuario.html';
+});
+

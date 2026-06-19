@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <link rel="stylesheet" href="/cadastro-user.css">
+    <link rel="stylesheet" href="/style.css">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastrar Usuário</title>
+</head>
+<body>
+
+    
+    <div class = "registrer-form">
+        <h1>Cadastrar Usuário</h1>
+    <form id="register-form">
+        <input type="text" id="nome" placeholder="Nome" required>
+
+        <input type="email" id="email" placeholder="Email" required>
+
+        <input type="password" id="senha" placeholder="Senha" required>
+
+       <select id="permissao">
+            <option value="padrao">Técnico</option>
+            <option value="admin">Administrador</option>
+        </select>
+
+        <button type="submit">
+            Cadastrar
+        </button>
+        <button type="button" id="btn-voltar">
+        Voltar
+        </button>
+    </form>
+    </div>
+    <script src="/script.js"></script>
+    <script src="/cadastro-usuario.js"></script>
+
+</body>
+</html>
