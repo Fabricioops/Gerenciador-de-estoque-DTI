@@ -15,6 +15,8 @@ const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const metaRoutes = require('./routes/metaRoutes');
 const { connectDB, executeQuery } = require("./db"); // Certifique-se de importar executeQuery
+const movimentacaoRoutes = require('./routes/movimentacaoRoutes');    //chama a pagina de movimentação
+
 
 
 const app = express();
@@ -40,6 +42,11 @@ const equipamentoRoutes = require('./routes/equipamentoRoutes');
 app.use('/api/equipamentos', equipamentoRoutes);
 // Rotas de metadados (locais / statuses)
 app.use('/api/meta', metaRoutes);
+
+app.use(
+    '/api/movimentacoes',
+    movimentacaoRoutes
+);
 
 // Rota de teste
 app.get('/', (req, res) => {

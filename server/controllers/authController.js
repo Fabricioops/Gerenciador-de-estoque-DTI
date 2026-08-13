@@ -49,10 +49,11 @@ exports.login = async (req, res) => {
             message: 'Login bem-sucedido!',
             token: token,
             user: {
-                nome: user.nome,
-                email: user.email,
-                permissao: user.permissao
-            }
+            id: user.id,
+            nome: user.nome,
+            email: user.email,
+            permissao: user.permissao
+}
         });
 
     } catch (error) {

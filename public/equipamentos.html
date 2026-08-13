@@ -33,15 +33,12 @@
                     <option value="PARA_DESCARTE">Para Descarte</option>
                     <option value="INVENTARIADO">Inventariado</option>
                     <option value="QUEIMADO">Queimado</option>
+                    <option value="__add_status__">+ Adicionar novo status</option>   //adicionar status ---------------------------
                 </select>
                 <button id="add-status-btn" class="btn-secondary" type="button" style="margin-left:6px;display:none">+ Status</button>
                 <select id="local-filter">
                     <option value="">Todos os Locais</option>
-                    <option value="1">Descarte Farolândia</option>
-                    <option value="2">Lixo Eletrônico B54</option>
-                    <option value="3">D13</option>
-                    <option value="4">Inventariado Centro</option>
-                    <option value="__add_local__">+ Adicionar novo local</option>
+                    <option value="__add_local__">+ Adicionar novo local</option>  //adicionar novo local-----------------------------
                 </select>
                 <button class="btn-secondary" onclick="clearFilters()">
                     <i class="fas fa-times"></i> Limpar
@@ -137,10 +134,6 @@
                             <label for="local_id">Local *</label>
                             <select id="local_id" required>
                                 <option value="">Selecione o local</option>
-                                <option value="1">Descarte Farolândia</option>
-                                <option value="2">Lixo Eletrônico B54</option>
-                                <option value="3">D13</option>
-                                <option value="4">Inventariado Centro</option>
                                 <option value="__add_local__">+ Adicionar novo local</option>
                             </select>
                         </div>

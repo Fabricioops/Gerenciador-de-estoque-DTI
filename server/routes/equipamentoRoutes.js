@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const equipamentoController = require('../controllers/equipamentoController');
+const { verifyToken } = require('../middleware/authMiddleware');
 
 // GET /api/equipamentos -> lista equipamentos
-router.get('/', equipamentoController.list);
+router.get('/',verifyToken, equipamentoController.list);
 // POST /api/equipamentos -> cria equipamento
-router.post('/', equipamentoController.create);
+router.post('/',verifyToken, equipamentoController.create);
 // PUT /api/equipamentos/:id -> atualiza equipamento
-router.put('/:id', equipamentoController.update);
+router.put('/:id',verifyToken, equipamentoController.update);
 // DELETE /api/equipamentos/:id -> remove equipamento
-router.delete('/:id', equipamentoController.remove);
+router.delete('/:id',verifyToken, equipamentoController.remove);
 
 module.exports = router;
