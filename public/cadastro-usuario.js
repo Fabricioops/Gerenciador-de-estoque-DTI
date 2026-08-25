@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } else {
 
-                alert(data.message || 'Erro ao cadastrar usuário');
+                alert(data.message || 'Erro ao cadastrar usuário, email ou senha inválidos');
 
             }
 

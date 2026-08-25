@@ -56,6 +56,23 @@
         // ignore
       }
 
+      // O cabeçalho é compartilhado por todas as páginas autenticadas. Por isso,
+      // o logout deve ser configurado aqui, e não depender do script de uma tela.
+      try {
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            window.location.replace('/');
+          });
+          window.logoutHandlerConfigured = true;
+        }
+      } catch (e) {
+        // nÃ£o-fatal
+      }
+
       return html;
     })
     .catch(err => {

@@ -100,17 +100,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ignore
   }
 
-  // Logout handler (mostra tela de login novamente)
+  // Fallback para páginas que carregarem este script sem o header compartilhado.
   const logoutBtn = document.getElementById('logout-btn');
-  if (logoutBtn) {
+  if (logoutBtn && !window.logoutHandlerConfigured) {
     logoutBtn.addEventListener('click', (ev) => {
       ev.preventDefault();
       localStorage.removeItem('user');
-      localStorage.removeItem('token')
-      const loginContainer = document.getElementById('login-container');
-      const dashboardContainer = document.getElementById('dashboard-container');
-      if (dashboardContainer) dashboardContainer.style.display = 'none';
-      if (loginContainer) loginContainer.style.display = 'block';
+      localStorage.removeItem('token');
+      window.location.replace('/');
     });
   }
 
