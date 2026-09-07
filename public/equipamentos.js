@@ -686,16 +686,20 @@ async function deleteEquipment(id) {
     if (!confirm('Confirma exclusão?')) return;
 
     try {
-        await fetch(`${API_BASE_URL}/equipamentos/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/equipamentos/${id}`, {
             method: 'DELETE',
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
             }
         });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Erro ao excluir equipamento');
+        }
         showToast('Equipamento excluído');
-        loadEquipments();
-    } catch {
-        showToast('Erro ao excluir', 'error');
+        await loadEquipments();
+    } catch (err) {
+        showToast(err.message || 'Erro ao excluir', 'error');
     }
 }
 

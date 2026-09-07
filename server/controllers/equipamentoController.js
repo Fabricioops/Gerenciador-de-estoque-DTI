@@ -121,6 +121,9 @@ const equipamento = await executeQuery(
   [id]
 );
 console.log("Equipamento antes da exclusão:", equipamento);
+    if (equipamento.length === 0) {
+      return res.status(404).json({ message: 'Equipamento não encontrado' });
+    }
     const localAntigo = equipamento.length > 0
   ? equipamento[0].local_id
   : null;
@@ -134,7 +137,7 @@ console.log("Equipamento antes da exclusão:", equipamento);
     if (!tecnico || (typeof tecnico === 'string' && tecnico.trim() === '')) {
       return res.status(400).json({ message: 'O campo tecnico é obrigatório' });
     }
-    const sql = `UPDATE Equipamentos SET tipo_equipamento = ?, marca = ?, modelo = ?, patrimonio = ?, numero_serie = ?, numero_chamado = ?, status_equipamento = ?, local_id = ?, data_cadastro = ?, observacao = ?, tecnico = ? WHERE id = ?`;
+    const sql = `UPDATE Equipamentos SET tipo_equipamento = ?, marca = ?, modelo = ?, patrimonio = ?, numero_serie = ?, numero_chamado = ?, status_equipamento = ?, local_id = ?, data_cadastro = ?, observacao = ?, tecnico = ? WHERE id = ? AND excluido = 0`;
     const params = [
       tipo_equipamento,
       marca,
@@ -151,6 +154,9 @@ console.log("Equipamento antes da exclusão:", equipamento);
     ];
     console.log('Executando UPDATE:', sql, 'params:', params);
     const result = await executeQuery(sql, params);              ////////////////movimentaçao captura
+    if (!result || result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Equipamento não encontrado' });
+    }
     // Se o local foi alterado, registra uma movimentação
 if (localAntigo != local_id) {
     const usuarioId = req.user.id;  /// salvando o id do usuário logado 

@@ -115,6 +115,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // podemos rebindar aqui ou chamar loadSharedHeader() novamente.
 
   // Quando o dashboard é exibido, popula os cards e inicializa gráficos
+  let categoryChart;
+  let statusChart;
+
   async function loadDashboardData() {
     try {
       // pega o token salvo no login
@@ -180,24 +183,40 @@ const [catResp, statusResp] = await Promise.all([
       try {
         if (window.Chart) {
           // Category chart
-          const catCtx = document.getElementById('category-chart').getContext('2d');
+          const categoryCanvas = document.getElementById('category-chart');
           const catLabels = categories.map(r => r.category || r.tipo_equipamento);
           const catData = categories.map(r => r.count || r.Count || 0);
-          new Chart(catCtx, {
-            type: 'bar',
-            data: { labels: catLabels, datasets: [{ label: 'Quantidade', data: catData, backgroundColor: '#007bff' }] },
-            options: { responsive: true }
-          });
+          if (categoryCanvas) {
+            if (!categoryChart) {
+              categoryChart = Chart.getChart(categoryCanvas) || new Chart(categoryCanvas, {
+                type: 'bar',
+                data: { labels: catLabels, datasets: [{ label: 'Quantidade', data: catData, backgroundColor: '#007bff' }] },
+                options: { responsive: true }
+              });
+            } else {
+              categoryChart.data.labels = catLabels;
+              categoryChart.data.datasets[0].data = catData;
+              categoryChart.update();
+            }
+          }
 
           // Status chart
-          const statusCtx = document.getElementById('status-chart').getContext('2d');
+          const statusCanvas = document.getElementById('status-chart');
           const statusLabels = statuses.map(r => r.status || r.status_equipamento);
           const statusData = statuses.map(r => r.count || r.Count || 0);
-          new Chart(statusCtx, { //criação do grafico 
-            type: 'pie',
-            data: { labels: statusLabels, datasets: [{ label: 'Qtd', data: statusData }] },
-            options: { responsive: true }
-          });
+          if (statusCanvas) {
+            if (!statusChart) {
+              statusChart = Chart.getChart(statusCanvas) || new Chart(statusCanvas, {
+                type: 'pie',
+                data: { labels: statusLabels, datasets: [{ label: 'Qtd', data: statusData }] },
+                options: { responsive: true }
+              });
+            } else {
+              statusChart.data.labels = statusLabels;
+              statusChart.data.datasets[0].data = statusData;
+              statusChart.update();
+            }
+          }
         }
       } catch (e) {
         console.warn('Erro ao inicializar gráficos:', e);
@@ -244,7 +263,16 @@ async function loadSharedHeader() {
 // ==========================================
 // LÓGICA DA TELA DE CADASTRO (CRIAR USUÁRIO)
 // ==========================================
-document.getElementById('btn-criar-user').addEventListener('click', ()=> {
-  window.location.href = '/cadastro-usuario.html';
-});
+const createUserButton = document.getElementById('btn-criar-user');
+if (createUserButton) {
+  createUserButton.addEventListener('click', () => {
+    window.location.href = '/cadastro-usuario.html';
+  });
+}
 
+const backButton = document.getElementById('btn-voltar');
+if (backButton) {
+  backButton.addEventListener('click', () => {
+    window.history.back();
+  });
+}

@@ -16,7 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.textContent = 'Carregando...';
     tableBody.innerHTML = '';
     try {
-      const res = await fetch('http://localhost:3000/api/equipamentos');
+      const res = await fetch('http://localhost:3000/api/equipamentos', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       if (!res.ok) throw new Error('Erro ao buscar equipamentos: ' + res.status);
       const rows = await res.json();
       if (!Array.isArray(rows)) throw new Error('Resposta inválida do servidor');
