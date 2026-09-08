@@ -48,7 +48,7 @@ function loadUserInfo() {
         }
         // Mostra controles de admin no frontend (botão +Status)
         try {
-            const addStatusBtn = document.getElementById('add-status-btn');
+            const addStatusBtn = document.getElementById('__add_status__');
             if (addStatusBtn) {
                 if (user.permissao && String(user.permissao).toUpperCase() === 'ADMIN') addStatusBtn.style.display = 'inline-block';
                 else addStatusBtn.style.display = 'none';
@@ -94,7 +94,7 @@ function setupEventListeners() {
     const form = document.getElementById('equipment-form');
     if (form) form.addEventListener('submit', handleFormSubmit);
 
-    const addStatusBtn = document.getElementById('add-status-btn');
+    const addStatusBtn = document.getElementById('__add_status__');
     if (addStatusBtn) addStatusBtn.addEventListener('click', () => openMetaModal('status', null));
 
     const equipmentModal = document.getElementById('equipment-modal');

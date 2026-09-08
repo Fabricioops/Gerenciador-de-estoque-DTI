@@ -27,13 +27,13 @@
                 <input type="text" id="search-input" placeholder="Buscar por patrimônio, marca, modelo, técnico, nº chamado...">
             </div>
             <div class="filter-group">
-                <select id="status-filter">
+                <select id="status-filter" onchange="if (this.value === '__add_status__') { openMetaModal('status'); this.value = ''; }">
                     <option value="">Todos os Status</option>
                     <option value="FUNCIONANDO">Funcionando</option>
                     <option value="PARA_DESCARTE">Para Descarte</option>
                     <option value="INVENTARIADO">Inventariado</option>
                     <option value="QUEIMADO">Queimado</option>
-                    <option value="__add_status__">+ Adicionar novo status</option>   //adicionar status ---------------------------
+                    <option value="__add_status__">+ Adicionar novo status</option>   //adicionar status ---------------------------ATENBCAO
                 </select>
                 <button id="add-status-btn" class="btn-secondary" type="button" style="margin-left:6px;display:none">+ Status</button>
                 <select id="local-filter">
