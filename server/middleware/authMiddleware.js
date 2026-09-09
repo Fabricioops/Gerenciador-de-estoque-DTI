@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || (
+  process.env.NODE_ENV === 'production'
+    ? null
+    : 'dti-estoque-dev-secret-change-me'
+);
 
 function verifyToken(req, res, next) {
   const auth = req.headers.authorization || '';

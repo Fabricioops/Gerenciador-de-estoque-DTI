@@ -4,7 +4,11 @@ const bcrypt = require('bcryptjs');
 const { executeQuery } = require('../db'); // Importamos a função executeQuery
 
 // Segredo para o JWT. Em um projeto real, use uma variável de ambiente!
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || (
+    process.env.NODE_ENV === 'production'
+        ? null
+        : 'dti-estoque-dev-secret-change-me'
+);
 
 exports.login = async (req, res) => {
     const { email, senha } = req.body; // O nome da variável aqui deve ser 'senha'
@@ -15,7 +19,7 @@ exports.login = async (req, res) => {
 
     try {
         // Sintaxe de query para MySQL, usando '?' como placeholder
-        const sqlQuery = 'SELECT * FROM Usuarios WHERE email = ?';
+        const sqlQuery = 'SELECT * FROM usuarios WHERE email = ?';
         const users = await executeQuery(sqlQuery, [email]);
 
         if (users.length === 0) {
@@ -36,6 +40,10 @@ exports.login = async (req, res) => {
 
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Senha inválida.' });
+        }
+
+        if (!JWT_SECRET) {
+            throw new Error('JWT_SECRET não configurado em produção');
         }
 
         // Gera o token JWT
@@ -71,7 +79,7 @@ exports.registerUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const sqlQuery = 'INSERT INTO Usuarios (nome, email, senha, permissao) VALUES (?, ?, ?, ?)';
+        const sqlQuery = 'INSERT INTO usuarios (nome, email, senha, permissao) VALUES (?, ?, ?, ?)';
         await executeQuery(sqlQuery, [nome, email, hashedPassword, permissao]);
         
         res.status(201).json({ message: 'Usuário criado com sucesso!' });

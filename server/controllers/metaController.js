@@ -1,7 +1,7 @@
 const { executeQuery } = require('../db');
 
 async function ensureLocaisTable() {
-  const sql = `CREATE TABLE IF NOT EXISTS Locais (
+  const sql = `CREATE TABLE IF NOT EXISTS locais (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL UNIQUE,
     descricao TEXT DEFAULT NULL,
@@ -12,7 +12,7 @@ async function ensureLocaisTable() {
 }
 
 async function ensureStatusesTable() {
-  const sql = `CREATE TABLE IF NOT EXISTS Statuses (
+  const sql = `CREATE TABLE IF NOT EXISTS statuses (
     id INT AUTO_INCREMENT PRIMARY KEY,
     chave VARCHAR(100) NOT NULL UNIQUE,
     label VARCHAR(255) NOT NULL,
@@ -24,7 +24,7 @@ async function ensureStatusesTable() {
 exports.getLocais = async (req, res) => {
   try {
     await ensureLocaisTable();
-    const rows = await executeQuery('SELECT id, nome, descricao, campus FROM Locais ORDER BY nome');
+    const rows = await executeQuery('SELECT id, nome, descricao, campus FROM locais ORDER BY nome');
     res.json(rows);
   } catch (err) {
     console.error('getLocais err', err);
@@ -37,7 +37,7 @@ exports.createLocal = async (req, res) => {
   if (!nome || !nome.trim()) return res.status(400).json({ message: 'Nome do local é obrigatório' });
   try {
     await ensureLocaisTable();
-    const sql = 'INSERT INTO Locais (nome, descricao, campus) VALUES (?, ?, ?)';
+    const sql = 'INSERT INTO locais (nome, descricao, campus) VALUES (?, ?, ?)';
     const result = await executeQuery(sql, [nome.trim(), descricao || null, campus || null]);
     res.status(201).json({ id: result.insertId, nome: nome.trim(), descricao: descricao || null, campus: campus || null });
   } catch (err) {
@@ -50,7 +50,7 @@ exports.createLocal = async (req, res) => {
 exports.getStatuses = async (req, res) => {
   try {
     await ensureStatusesTable();
-    const rows = await executeQuery('SELECT id, chave, label FROM Statuses ORDER BY label');
+    const rows = await executeQuery('SELECT id, chave, label FROM statuses ORDER BY label');
     res.json(rows);
   } catch (err) {
     console.error('getStatuses err', err);
@@ -63,7 +63,7 @@ exports.createStatus = async (req, res) => {
   if (!chave || !chave.trim() || !label || !label.trim()) return res.status(400).json({ message: 'Chave e label são obrigatórios' });
   try {
     await ensureStatusesTable();
-    const result = await executeQuery('INSERT INTO Statuses (chave, label) VALUES (?, ?)', [chave.trim(), label.trim()]);
+    const result = await executeQuery('INSERT INTO statuses (chave, label) VALUES (?, ?)', [chave.trim(), label.trim()]);
     res.status(201).json({ id: result.insertId, chave: chave.trim(), label: label.trim() });
   } catch (err) {
     console.error('createStatus err', err);
