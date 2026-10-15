@@ -44,7 +44,7 @@ function loadUserInfo() {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const el = document.getElementById('user-name');
         if (el && user.nome) {
-            el.textContent = user.nome;
+            el.textContent = `Olá, ${user.nome}`;
         }
         // Mostra controles de admin no frontend (botão +Status)
         try {
