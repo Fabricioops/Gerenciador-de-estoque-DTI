@@ -171,7 +171,8 @@ data_movimentacao,
 usuario_id,
 observacao
 )
-VALUES (?, ?, ?, ?, NOW(), ?, ?)`,
+VALUES (?, ?, ?, ?, NOW(), ?, ?)
+`,
 [
     id,
     'TRANSFERENCIA',

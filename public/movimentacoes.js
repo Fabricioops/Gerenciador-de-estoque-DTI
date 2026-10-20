@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
     inicializarFiltroData();
     registrarEventosDosFiltros();
     carregarMovimentacoes();
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") carregarMovimentacoes();
+    });
 });
 
 async function carregarMovimentacoes() {
@@ -18,6 +21,7 @@ async function carregarMovimentacoes() {
 
     try {
         const response = await fetch("/api/movimentacoes", {
+            cache: "no-store",
             headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -80,7 +84,7 @@ function filtrarMovimentacoes() {
         if (tipo && mov.tipo_movimentacao !== tipo) return false;
 
         const camposPesquisaveis = [
-            mov.modelo, mov.patrimonio, mov.origem, mov.destino,
+            mov.modelo, mov.patrimonio, mov.tipo_equipamento, mov.origem, mov.destino,
             mov.tecnico, mov.observacao, mov.tipo_movimentacao
         ];
         return !busca || textoNormalizado(camposPesquisaveis.join(" ")).includes(busca);
@@ -117,6 +121,7 @@ function renderizarTabela(movimentacoes) {
         const valores = [
             formatarData(mov.data_movimentacao),
             `${mov.modelo || "-"} (${mov.patrimonio || "-"})`,
+            mov.tipo_equipamento || "-",
             mov.tipo_movimentacao || "-", mov.origem || "-", mov.destino || "-",
             mov.tecnico || "-", mov.observacao || "-"
         ];
