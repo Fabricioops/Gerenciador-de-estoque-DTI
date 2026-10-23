@@ -5,7 +5,7 @@ exports.list = async (req, res) => {
   try {
     const sql = `
   SELECT *
-  FROM Equipamentos
+  FROM equipamentos
   WHERE excluido = 0
   ORDER BY id DESC
   LIMIT 1000
@@ -31,7 +31,7 @@ exports.create = async (req, res) => {
     if (!tecnico || (typeof tecnico === 'string' && tecnico.trim() === '')) {
       return res.status(400).json({ message: 'O campo tecnico é obrigatório' });
     }
-    const sql = `INSERT INTO Equipamentos (tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado, status_equipamento, local_id, data_cadastro, observacao, tecnico)
+    const sql = `INSERT INTO equipamentos (tipo_equipamento, marca, modelo, patrimonio, numero_serie, numero_chamado, status_equipamento, local_id, data_cadastro, observacao, tecnico)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const params = [
       tipo_equipamento,
@@ -115,7 +115,7 @@ const equipamento = await executeQuery(
     modelo,
     patrimonio,
     local_id
-  FROM Equipamentos
+  FROM equipamentos
   WHERE id = ?
   `,
   [id]
@@ -137,7 +137,7 @@ console.log("Equipamento antes da exclusão:", equipamento);
     if (!tecnico || (typeof tecnico === 'string' && tecnico.trim() === '')) {
       return res.status(400).json({ message: 'O campo tecnico é obrigatório' });
     }
-    const sql = `UPDATE Equipamentos SET tipo_equipamento = ?, marca = ?, modelo = ?, patrimonio = ?, numero_serie = ?, numero_chamado = ?, status_equipamento = ?, local_id = ?, data_cadastro = ?, observacao = ?, tecnico = ? WHERE id = ? AND excluido = 0`;
+    const sql = `UPDATE equipamentos SET tipo_equipamento = ?, marca = ?, modelo = ?, patrimonio = ?, numero_serie = ?, numero_chamado = ?, status_equipamento = ?, local_id = ?, data_cadastro = ?, observacao = ?, tecnico = ? WHERE id = ? AND excluido = 0`;
     const params = [
       tipo_equipamento,
       marca,
@@ -171,7 +171,8 @@ data_movimentacao,
 usuario_id,
 observacao
 )
-VALUES (?, ?, ?, ?, NOW(), ?, ?)`,
+VALUES (?, ?, ?, ?, NOW(), ?, ?)
+`,
 [
     id,
     'TRANSFERENCIA',
@@ -200,7 +201,7 @@ exports.remove = async (req, res) => {
 
     // Busca o local atual do equipamento
     const equipamento = await executeQuery(
-      'SELECT local_id FROM Equipamentos WHERE id = ?',
+      'SELECT local_id FROM equipamentos WHERE id = ?',
       [id]
     );
 
@@ -237,7 +238,7 @@ exports.remove = async (req, res) => {
 
     // Remove o equipamento      //soft delete - move para coluna de excluidos
     const sql = `
-    UPDATE Equipamentos   
+    UPDATE equipamentos   
     SET excluido = 1
     WHERE id = ?
    `;

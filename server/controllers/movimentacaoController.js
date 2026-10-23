@@ -2,6 +2,7 @@ const { executeQuery } = require('../db');
 
 exports.listarMovimentacoes = async (req, res) => {
     try {
+        res.set('Cache-Control', 'no-store');
 
         const sql = `
             SELECT
@@ -10,6 +11,7 @@ exports.listarMovimentacoes = async (req, res) => {
     m.tipo_movimentacao,
     e.patrimonio,
     e.modelo,
+    e.tipo_equipamento,
 
     l1.nome AS origem,
     l2.nome AS destino,
