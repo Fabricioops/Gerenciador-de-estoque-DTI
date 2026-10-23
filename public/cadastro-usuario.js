@@ -4,6 +4,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!form) return;
 
+    const permissionSelect = document.getElementById('permissao');
+    let user = {};
+    try {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    } catch (error) {
+        console.error('Não foi possível ler os dados do usuário.', error);
+    }
+    const permission = String(user.permissao ?? '').trim().toUpperCase();
+    const isAdmin = ['ADMIN', 'ADMINISTRADOR', 'ADM', '1', 'TRUE'].includes(permission);
+    const token = localStorage.getItem('token');
+
+    if (isAdmin && token && permissionSelect) {
+        permissionSelect.add(new Option('Administrador', 'admin'));
+    }
+
     form.addEventListener('submit', async (event) => {
 
         event.preventDefault();
@@ -11,23 +26,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const nome = document.getElementById('nome').value;
         const email = document.getElementById('email').value;
         const senha = document.getElementById('senha').value;
-        const permissao = document.getElementById('permissao').value;
+        const isAdminCreation = isAdmin && Boolean(token);
+        const payload = { nome, email, password: senha };
+
+        if (isAdminCreation) {
+            payload.permissao = permissionSelect.value;
+        }
 
         try {
 
             const response = await fetch(
-                'http://localhost:3000/api/auth/register',
+                isAdminCreation
+                    ? '/api/auth/users'
+                    : '/api/auth/register',
                 {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        ...(isAdminCreation ? { Authorization: `Bearer ${token}` } : {})
                     },
-                    body: JSON.stringify({
-                        nome,
-                        email,
-                        password: senha,
-                        permissao
-                    })
+                    body: JSON.stringify(payload)
                 }
             );
 

@@ -109,11 +109,11 @@ function clearMovementFilters() {
 }
 
 function renderizarTabela(movimentacoes) {
-    const tbody = document.getElementById("movements-tbody");
+    const tbody = document.getElementById("movements-tbody");     //////////////////---
     tbody.replaceChildren();
 
     movimentacoes.forEach((mov) => {
-        const linha = document.createElement("tr");
+        const linha = document.createElement("tr");''
         const valores = [
             formatarData(mov.data_movimentacao),
             `${mov.modelo || "-"} (${mov.patrimonio || "-"})`,

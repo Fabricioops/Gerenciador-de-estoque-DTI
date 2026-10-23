@@ -39,6 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // ===============================
 // Usuário logado
 // ===============================
+function hasAdminPermission(permission) {
+    return ['ADMIN', 'ADMINISTRADOR', 'ADM', '1', 'TRUE']
+        .includes(String(permission ?? '').trim().toUpperCase());
+}
+
 function loadUserInfo() {
     try {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -46,14 +51,18 @@ function loadUserInfo() {
         if (el && user.nome) {
             el.textContent = `Olá, ${user.nome}`;
         }
-        // Mostra controles de admin no frontend (botão +Status)
-        try {
-            const addStatusBtn = document.getElementById('__add_status__');
-            if (addStatusBtn) {
-                if (user.permissao && String(user.permissao).toUpperCase() === 'ADMIN') addStatusBtn.style.display = 'inline-block';
-                else addStatusBtn.style.display = 'none';
-            }
-        } catch (e) {}
+        const isAdmin = hasAdminPermission(user.permissao);
+        const addStatusBtn = document.getElementById('add-status-btn');
+        if (addStatusBtn) addStatusBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
+        if (!isAdmin) {
+            ['status-filter', 'local-filter', 'local_id'].forEach(id => {
+                const select = document.getElementById(id);
+                const addOption = select && Array.from(select.options)
+                    .find(option => ['__add_status__', '__add_local__'].includes(option.value));
+                if (addOption) addOption.remove();
+            });
+        }
     } catch {
         // ignora erro
     }
@@ -69,7 +78,15 @@ function setupEventListeners() {
     }
 
     const statusFilter = document.getElementById('status-filter');
-    if (statusFilter) statusFilter.addEventListener('change', filterEquipments);
+    if (statusFilter) {
+        statusFilter.addEventListener('change', (event) => {
+            if (event.target.value === '__add_status__') {
+                openMetaModal('status', event.target);
+            } else {
+                filterEquipments();
+            }
+        });
+    }
 
     const localFilter = document.getElementById('local-filter');
     if (localFilter) {
@@ -94,7 +111,7 @@ function setupEventListeners() {
     const form = document.getElementById('equipment-form');
     if (form) form.addEventListener('submit', handleFormSubmit);
 
-    const addStatusBtn = document.getElementById('__add_status__');
+    const addStatusBtn = document.getElementById('add-status-btn');
     if (addStatusBtn) addStatusBtn.addEventListener('click', () => openMetaModal('status', null));
 
     const equipmentModal = document.getElementById('equipment-modal');
@@ -168,16 +185,16 @@ function closeMetaModal() {
     const modal = document.getElementById('meta-modal');
     modal.classList.remove('active');
     // Se um select estava no estado add, reseta
-    try {
-        if (metaPendingSelect && metaPendingSelect.value === '__add_local__') metaPendingSelect.value = '';
-    } catch (e) {}
+    if (metaPendingSelect && ['__add_local__', '__add_status__'].includes(metaPendingSelect.value)) {
+        metaPendingSelect.value = '';
+    }
     metaPendingSelect = null;
 }
 
 async function submitMetaForm() {
     const type = document.getElementById('meta-type').value;
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (!user.permissao || String(user.permissao).toUpperCase() !== 'ADMIN') {
+    if (!hasAdminPermission(user.permissao)) {
         showToast('Apenas administradores podem criar', 'error');
         closeMetaModal();
         return;
