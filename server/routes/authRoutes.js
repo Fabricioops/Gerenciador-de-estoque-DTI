@@ -7,8 +7,12 @@ const { verifyToken, requireAdmin } = require('../middleware/authMiddleware');
 // Rota de Login
 router.post('/login', authController.login);
 
+<<<<<<< HEAD
 // Cadastro público sempre cria uma conta de Técnico.
 router.post('/register', authController.registerUser);
+=======
+router.post('/register', verifyToken, requireAdmin, authController.registerUser);
+>>>>>>> 9c4cd8c (Reforça segurança do cadastro, configura segredos e adiciona testes automatizados)
 
 // Somente Administradores podem escolher a permissão da nova conta.
 router.post('/users', verifyToken, requireAdmin, authController.createUser);

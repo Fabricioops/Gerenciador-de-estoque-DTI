@@ -260,16 +260,6 @@ async function loadSharedHeader() {
   }
 }
 
-// ==========================================
-// LÓGICA DA TELA DE CADASTRO (CRIAR USUÁRIO)
-// ==========================================
-const createUserButton = document.getElementById('btn-criar-user');
-if (createUserButton) {
-  createUserButton.addEventListener('click', () => {
-    window.location.href = '/cadastro-usuario.html';
-  });
-}
-
 const backButton = document.getElementById('btn-voltar');
 if (backButton) {
   backButton.addEventListener('click', () => {

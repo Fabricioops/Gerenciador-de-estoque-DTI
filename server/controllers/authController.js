@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+<<<<<<< HEAD
 const { executeQuery } = require('../db');
 
 <<<<<<< HEAD
@@ -44,6 +45,11 @@ async function createUser(req, res, permission) {
         return res.status(500).json({ message: 'Erro ao criar usuário.' });
     }
 }
+=======
+const { executeQuery } = require('../db'); // Importamos a função executeQuery
+const { getJwtSecret } = require('../config');
+const JWT_SECRET = getJwtSecret();
+>>>>>>> 9c4cd8c (Reforça segurança do cadastro, configura segredos e adiciona testes automatizados)
 
 exports.login = async (req, res) => {
     const { email, senha } = req.body; // O nome da variável aqui deve ser 'senha'
@@ -107,6 +113,7 @@ exports.login = async (req, res) => {
 
 exports.registerUser = async (req, res) => {
 <<<<<<< HEAD
+<<<<<<< HEAD
     return createUser(req, res, 'padrao');
 };
 
@@ -119,9 +126,26 @@ exports.createUser = async (req, res) => {
     return createUser(req, res, permission);
 =======
     const { nome, email, password, permissao } = req.body;
+=======
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    const nome = typeof body.nome === 'string' ? body.nome.trim() : '';
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    const password = typeof body.password === 'string' ? body.password : '';
+    const permissao = typeof body.permissao === 'string'
+        ? body.permissao.trim().toLowerCase()
+        : '';
+
+    if (!nome || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 12) {
+        return res.status(400).json({
+            message: 'Informe nome, email válido e senha com pelo menos 12 caracteres.'
+        });
+    }
+    if (!['padrao', 'admin'].includes(permissao)) {
+        return res.status(400).json({ message: 'Permissão inválida.' });
+    }
+>>>>>>> 9c4cd8c (Reforça segurança do cadastro, configura segredos e adiciona testes automatizados)
 
     try {
-        // Criptografa a senha
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -130,6 +154,9 @@ exports.createUser = async (req, res) => {
         
         res.status(201).json({ message: 'Usuário criado com sucesso!' });
     } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: 'Já existe um usuário com esse email.' });
+        }
         console.error('Erro ao registrar usuário:', error);
         res.status(500).json({ message: 'Erro ao criar usuário.' });
     }

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <link rel="stylesheet" href="/cadastro-user.css">
-    <link rel="stylesheet" href="/style.css">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastrar Usuário</title>
+    <link rel="stylesheet" href="/cadastro-user.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
@@ -16,7 +17,7 @@
 
         <input type="email" id="email" placeholder="Email" required>
 
-        <input type="password" id="senha" placeholder="Senha" required>
+        <input type="password" id="senha" placeholder="Senha (mínimo 12 caracteres)" minlength="12" required>
 
        <select id="permissao">
             <option value="padrao">Técnico</option>

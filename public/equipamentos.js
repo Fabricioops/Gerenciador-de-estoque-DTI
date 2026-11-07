@@ -429,6 +429,7 @@ function renderEquipments() {
     if (!grid) return;
 
     if (!filteredEquipments.length) {
+        grid.innerHTML = '';
         showEmptyState(true);
         return;
     }
@@ -756,6 +757,7 @@ function getStatusLabel(status) {
     return {
         FUNCIONANDO: 'Funcionando',
         PARA_DESCARTE: 'Para Descarte',
+        DESCARTE: 'Descarte',
         INVENTARIADO: 'Inventariado',
         QUEIMADO: 'Queimado'
     }[status] || 'Desconhecido';

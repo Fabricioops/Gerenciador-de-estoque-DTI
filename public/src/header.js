@@ -8,6 +8,17 @@
       const placeholder = document.getElementById('site-header') || document.getElementById('header');
       if (placeholder) placeholder.innerHTML = html;
 
+      const usersLink = placeholder && placeholder.querySelector('.admin-only');
+      if (usersLink) {
+        try {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const permission = String(user.permissao || '').toUpperCase();
+          usersLink.hidden = !['ADMIN', 'ADMINISTRADOR', 'ADM', '1'].includes(permission);
+        } catch (error) {
+          usersLink.hidden = true;
+        }
+      }
+
       // Marca a aba ativa no menu com base no caminho atual (mais robusto)
       try {
         const links = (placeholder ? placeholder.querySelectorAll('a.nav-link, .main-nav a') : document.querySelectorAll('a.nav-link, .main-nav a')) || [];

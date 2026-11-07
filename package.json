@@ -4,7 +4,11 @@
   "main": "app.js",
   "scripts": {
     "start": "node server/index.js",
+<<<<<<< HEAD
     "test": "node --test server/controllers/authController.test.js server/middleware/authMiddleware.test.js"
+=======
+    "test": "node --test server/config.test.js server/controllers/authController.test.js server/middleware/authMiddleware.test.js server/routes/authRoutes.test.js"
+>>>>>>> 9c4cd8c (Reforça segurança do cadastro, configura segredos e adiciona testes automatizados)
   },
   "keywords": [],
   "author": "",

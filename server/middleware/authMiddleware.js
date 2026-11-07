@@ -1,10 +1,6 @@
 const jwt = require('jsonwebtoken');
-
-const JWT_SECRET = process.env.JWT_SECRET || (
-  process.env.NODE_ENV === 'production'
-    ? null
-    : 'dti-estoque-dev-secret-change-me'
-);
+const { getJwtSecret } = require('../config');
+const JWT_SECRET = getJwtSecret();
 
 function verifyToken(req, res, next) {
   const auth = req.headers.authorization || '';
@@ -15,9 +11,6 @@ function verifyToken(req, res, next) {
   const token = parts[1];
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    // log para diagnóstico
-    console.log('verifyToken: auth header present, token length=', token.length);
-    console.log('verifyToken: payload=', payload);
     req.user = payload;
     next();
   } catch (err) {
