@@ -19,6 +19,10 @@ require.cache[controllerPath] = {
     registerUser: (_req, res) => {
       registrations += 1;
       res.sendStatus(201);
+    },
+    createUser: (_req, res) => {
+      registrations += 1;
+      res.sendStatus(201);
     }
   }
 };
@@ -29,6 +33,19 @@ app.use(express.json(), router);
 const server = app.listen(0);
 const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
+async function postRegistration(path, permission) {
+  const headers = { 'content-type': 'application/json' };
+  if (permission) {
+    const token = jwt.sign({ id: 1, permissao: permission }, process.env.JWT_SECRET);
+    headers.authorization = `Bearer ${token}`;
+  }
+  return fetch(`${baseUrl}${path}`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ nome: 'Test', permissao: 'admin' })
+  });
+}
+
 test.after(async () => {
   await new Promise(resolve => server.close(resolve));
   delete require.cache[routesPath];
@@ -36,40 +53,23 @@ test.after(async () => {
   else delete require.cache[controllerPath];
 });
 
-test('user registration is unavailable without an administrator token', async () => {
-  const response = await fetch(`${baseUrl}/register`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ nome: 'Test', permissao: 'admin' })
+for (const path of ['/register', '/users']) {
+  test(`${path} rejects unauthenticated registration`, async () => {
+    const response = await postRegistration(path);
+    assert.equal(response.status, 401);
   });
-  assert.equal(response.status, 401);
-  assert.equal(registrations, 0);
-});
 
-test('regular users cannot register another user', async () => {
-  const token = jwt.sign({ id: 2, permissao: 'padrao' }, process.env.JWT_SECRET);
-  const response = await fetch(`${baseUrl}/register`, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ nome: 'Test', permissao: 'admin' })
+  test(`${path} rejects a technician`, async () => {
+    const response = await postRegistration(path, 'padrao');
+    assert.equal(response.status, 403);
   });
-  assert.equal(response.status, 403);
-  assert.equal(registrations, 0);
-});
 
-test('an administrator can access the registration handler', async () => {
-  const token = jwt.sign({ id: 1, permissao: 'admin' }, process.env.JWT_SECRET);
-  const response = await fetch(`${baseUrl}/register`, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ nome: 'Test', permissao: 'padrao' })
+  test(`${path} allows an administrator`, async () => {
+    const response = await postRegistration(path, 'admin');
+    assert.equal(response.status, 201);
   });
-  assert.equal(response.status, 201);
-  assert.equal(registrations, 1);
+}
+
+test('only authenticated administrators reach user registration handlers', () => {
+  assert.equal(registrations, 2);
 });
